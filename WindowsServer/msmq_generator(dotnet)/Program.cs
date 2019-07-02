@@ -10,6 +10,11 @@ namespace msmq_generator
 
         static void Main(string[] args)
         {
+
+            // Will listen to msmq to remove/add an instrument by client request
+            // Will write logs 
+
+
             //Start with creating a queue on the server machine:
             MessageQueue queue = null;
             try

@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\KubeMsmqSDK\KubeMsmqSDK.csproj" />
+    <ProjectReference Include="..\kubemq_msmq_sdk(dotnetstandard)\kubemq_msmq_sdk.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kubme_msmq_worker", "kubemq
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "kubemq_msmq_worker_tester", "kubemq_msmq_worker_tester\kubemq_msmq_worker_tester.csproj", "{47196097-4568-43E1-A200-4ECC8FD5B60A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "msmq_receiver", "msmq_receiver\msmq_receiver.csproj", "{739977D5-FB93-4EBE-9A41-3D31C942F91D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{47196097-4568-43E1-A200-4ECC8FD5B60A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{47196097-4568-43E1-A200-4ECC8FD5B60A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{47196097-4568-43E1-A200-4ECC8FD5B60A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{739977D5-FB93-4EBE-9A41-3D31C942F91D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{739977D5-FB93-4EBE-9A41-3D31C942F91D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{739977D5-FB93-4EBE-9A41-3D31C942F91D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{739977D5-FB93-4EBE-9A41-3D31C942F91D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
