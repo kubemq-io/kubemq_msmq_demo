@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "MSMQTester": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "KUBEMQTIMEOUT": "5555550",
+        "KUBEMQSADDRESS": "qarancher:32143",
+        "KUBEMQSCHANNEL": "Tradency.KubeMQ.0"
+      }
+    }
+  }
+}
