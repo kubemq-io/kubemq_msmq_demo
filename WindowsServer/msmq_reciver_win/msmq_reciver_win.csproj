@@ -51,6 +51,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\kubemq_msmq_sdk%28dotnetstandard%29\kubemq_msmq_sdk.csproj">
+      <Project>{828DE945-D58A-48F8-97F8-9E6D66163C99}</Project>
+      <Name>kubemq_msmq_sdk</Name>
+    </ProjectReference>
     <ProjectReference Include="..\messagebody\messagebody.csproj">
       <Project>{7345a4a0-de33-4a99-8796-3c460997049a}</Project>
       <Name>messagebody</Name>

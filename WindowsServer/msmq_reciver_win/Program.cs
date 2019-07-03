@@ -1,22 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿
+using System;
 using System.Messaging;
+
 using System.Text;
 using System.Threading.Tasks;
 
 namespace msmq_reciver_win
 {
     class Program
-    {
-        private static bool pubLoop = true;
+    {   
         static void Main(string[] args)
         {
+         //   new KubeMQ.MSMQSDK.KubeMSMQInitiator();
             // this is an framework example soon to be converted to net core, this will replace msmq_receiver project
             MessageQueue queue = null;
             try
             {
-                queue = new MessageQueue(@".\private$\RAQueue", QueueAccessMode.Receive);
+                queue = new MessageQueue(@".\private$\RAQueue");
 
             }
             catch (Exception ex)
@@ -27,7 +27,7 @@ namespace msmq_reciver_win
             MessageQueue sendqueue = null;
             try
             {
-                sendqueue = new MessageQueue(@".\private$\q1", QueueAccessMode.Send);
+                sendqueue = new MessageQueue(@".\private$\q1");
             }
             catch (Exception ex)
             {
@@ -41,7 +41,7 @@ namespace msmq_reciver_win
                 KubeMQ.SDK.csharp.Events.Channel channel = new KubeMQ.SDK.csharp.Events.Channel(new KubeMQ.SDK.csharp.Events.ChannelParameters
                 {
                     ChannelName = "ratesstore",
-                    KubeMQAddress = "192.168.1.189:50000",
+                    KubeMQAddress = "104.47.142.90:50000",
                     ClientID = "msmq_reciver",
                     Store = true
                 });
@@ -70,7 +70,6 @@ namespace msmq_reciver_win
                     SubscribeType = KubeMQ.SDK.csharp.Subscription.SubscribeType.Commands,
                     Channel = "rateCMD",
                     ClientID = "msmq_reciver"
-
 
                 }, (KubeMQ.SDK.csharp.CommandQuery.RequestReceive request) =>
                 {
@@ -104,7 +103,7 @@ namespace msmq_reciver_win
             System.Threading.AutoResetEvent waitHandle = new System.Threading.AutoResetEvent(false);
             Console.CancelKeyPress += (object sender, ConsoleCancelEventArgs e) =>
             {
-                pubLoop = false;
+               
                 e.Cancel = true;
                 waitHandle.Set();
 
