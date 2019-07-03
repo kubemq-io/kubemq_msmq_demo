@@ -1,4 +1,5 @@
-﻿using System;
+﻿using messagebody;
+using System;
 using System.IO;
 using System.Messaging;
 
@@ -52,7 +53,7 @@ namespace msmq_generator
                     {
 
                         row = line.Split(',');
-                        Message message = new Message()
+                        MessageBody message = new MessageBody()
                         {
                             ID = row[0],
                             Name = row[1],
@@ -84,13 +85,5 @@ namespace msmq_generator
 
     }
 
-    [Serializable]
-    class Message
-    {
-        public string ID { get; set; }
-        public string Name { get; set; }
-        public string Ask { get; set; }
-        public string Bid { get; set; }   
-
-    }
+   
 }

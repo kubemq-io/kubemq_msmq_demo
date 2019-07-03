@@ -34,32 +34,34 @@ namespace msmq_reciver_win
 
             }
 
-            
-        Task msmqsub = Task.Run(() =>
-       {
-           while (pubLoop)
-           {
 
-               var message = queue.Receive();
-               message.Formatter = new BinaryMessageFormatter();
-               Console.WriteLine(message.Body.ToString());
+            Task msmqsub = Task.Run(() =>
+            {
 
-               KubeMQ.SDK.csharp.Events.Channel channel = new KubeMQ.SDK.csharp.Events.Channel(new KubeMQ.SDK.csharp.Events.ChannelParameters
-               {
-                   ChannelName = "ratesstore",
-                   KubeMQAddress = "192.168.1.189:50000",
-                   ClientID = "msmq_reciver",
-                   Store = true
-               });
-               channel.SendEvent(new KubeMQ.SDK.csharp.Events.Event
-               {
-                   Body = Encoding.UTF8.GetBytes(Newtonsoft.Json.JsonConvert.SerializeObject(message.Body)),
-                   Metadata = "Rate message json encoded in UTF8",
-                   EventID = message.Id
-               });
-           }
-       });
-    
+                KubeMQ.SDK.csharp.Events.Channel channel = new KubeMQ.SDK.csharp.Events.Channel(new KubeMQ.SDK.csharp.Events.ChannelParameters
+                {
+                    ChannelName = "ratesstore",
+                    KubeMQAddress = "192.168.1.189:50000",
+                    ClientID = "msmq_reciver",
+                    Store = true
+                });
+
+                queue.ReceiveCompleted += new ReceiveCompletedEventHandler((sender, eventArgs) =>
+                {
+                    eventArgs.Message.Formatter = new BinaryMessageFormatter();
+                    Console.WriteLine(eventArgs.Message.Body.ToString());
+
+                    channel.SendEvent(new KubeMQ.SDK.csharp.Events.Event
+                    {
+                        Body = Encoding.UTF8.GetBytes(Newtonsoft.Json.JsonConvert.SerializeObject(eventArgs.Message.Body)),
+                        Metadata = "Rate message json encoded in UTF8",
+                        EventID = eventArgs.Message.Id
+                    });
+                    queue.BeginReceive();
+                });
+                queue.BeginReceive();
+            });
+
             Task msmqcmd = Task.Run(() =>
             {
                 KubeMQ.SDK.csharp.CommandQuery.Responder responder = new KubeMQ.SDK.csharp.CommandQuery.Responder("192.168.1.189:50000");
@@ -68,7 +70,7 @@ namespace msmq_reciver_win
                     SubscribeType = KubeMQ.SDK.csharp.Subscription.SubscribeType.Commands,
                     Channel = "rateCMD",
                     ClientID = "msmq_reciver"
-                    
+
 
                 }, (KubeMQ.SDK.csharp.CommandQuery.RequestReceive request) =>
                 {
@@ -111,7 +113,5 @@ namespace msmq_reciver_win
             waitHandle.WaitOne();
 
         }
-
-
     }
 }

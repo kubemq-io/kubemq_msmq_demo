@@ -8,6 +8,18 @@ namespace msmq_receiver
         static void Main(string[] args)
         {
             // will start by connecting to kubemq
+            try
+            {
+                queue = new MessageQueue(MSMQPath, QueueAccessMode.Receive);
+                //queue.SetPermissions("Everyone", MessageQueueAccessRights.FullControl, AccessControlEntryType.Allow);
+                //queue.Authenticate = false;
+                //queue.EncryptionRequired = EncryptionRequired.None;
+            }
+            catch (Exception ex)
+            {
+
+            }
+
             // will run as a container
             // will pull msmq messages from server queue
             // will send it to presistent channel 
