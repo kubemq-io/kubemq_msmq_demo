@@ -1,33 +1,115 @@
-﻿using System;
+﻿using KubeMQ.MSMQSDK.Messages;
+using KubeMQ.MSMQSDK.SDK.csharp.Events;
+using System;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace msmq_receiver
 {
     class Program
     {
-        
+        const string kubemqAddress = "104.47.142.90:50000";
         static void Main(string[] args)
         {
-            // will start by connecting to kubemq
+          new KubeMQ.MSMQSDK.KubeMSMQInitiator();
+            // this is an framework example soon to be converted to net core, this will replace msmq_receiver project
+            MessageQueue queue = null;
             try
             {
-                queue = new MessageQueue(MSMQPath, QueueAccessMode.Receive);
-                //queue.SetPermissions("Everyone", MessageQueueAccessRights.FullControl, AccessControlEntryType.Allow);
-                //queue.Authenticate = false;
-                //queue.EncryptionRequired = EncryptionRequired.None;
+                queue = new MessageQueue(@".\private$\RAQueue");
+
             }
             catch (Exception ex)
             {
 
             }
 
-            // will run as a container
-            // will pull msmq messages from server queue
-            // will send it to presistent channel 
-            // Will listen to request for adding a new msmq message and send it to msmq_generator
-            // Will write logs 
+            MessageQueue sendqueue = null;
+            try
+            {
+                sendqueue = new MessageQueue(@".\private$\q1");
+            }
+            catch (Exception ex)
+            {
+
+            }
 
 
-            Console.WriteLine("Hello World!");
+            Task msmqsub = Task.Run(() =>
+            {
+
+                KubeMQ.SDK.csharp.Events.Channel channel = new KubeMQ.SDK.csharp.Events.Channel(new KubeMQ.SDK.csharp.Events.ChannelParameters
+                {
+                    ChannelName = "ratesstore",
+                    KubeMQAddress = kubemqAddress,
+                    ClientID = "msmq_reciver",
+                    Store = true
+                });
+
+                queue.ReceiveCompleted += new ReceiveCompletedEventHandler((sender, eventArgs) =>
+                {
+                    eventArgs.Message.Formatter = new BinaryMessageFormatter();
+                    Console.WriteLine(eventArgs.Message.Body.ToString());
+
+                    channel.SendEvent(new KubeMQ.SDK.csharp.Events.Event
+                    {
+                        Body = Encoding.UTF8.GetBytes(Newtonsoft.Json.JsonConvert.SerializeObject(eventArgs.Message.Body)),
+                        Metadata = "Rate message json encoded in UTF8",
+                        EventID = eventArgs.Message.Id
+                    });
+                    queue.BeginReceive();
+                });
+                queue.BeginReceive();
+            });
+
+            Task msmqcmd = Task.Run(() =>
+            {
+                KubeMQ.SDK.csharp.CommandQuery.Responder responder = new KubeMQ.SDK.csharp.CommandQuery.Responder(kubemqAddress);
+                responder.SubscribeToRequests(new KubeMQ.SDK.csharp.Subscription.SubscribeRequest()
+                {
+                    SubscribeType = KubeMQ.SDK.csharp.Subscription.SubscribeType.Commands,
+                    Channel = "rateCMD",
+                    ClientID = "msmq_reciver"
+
+                }, (KubeMQ.SDK.csharp.CommandQuery.RequestReceive request) =>
+                {
+                    if (request != null)
+                    {
+                        string strMsg = string.Empty;
+                        object body = Encoding.UTF8.GetString(request.Body);
+                        sendqueue.Send(new Message
+                        {
+                            Formatter = new BinaryMessageFormatter(),
+                            Body = body
+                        });
+
+                    }
+                    KubeMQ.SDK.csharp.CommandQuery.Response response = new KubeMQ.SDK.csharp.CommandQuery.Response(request)
+                    {
+                        Body = Encoding.UTF8.GetBytes("o.k"),
+                        CacheHit = false,
+                        Error = "None",
+                        ClientID = "msmq_reciver",
+                        Executed = true,
+                        Metadata = "OK",
+                        Timestamp = DateTime.UtcNow,
+                    };
+                    return response;
+                });
+
+            });
+            Console.WriteLine("[Demo] press Ctrl+c to stop");
+
+            System.Threading.AutoResetEvent waitHandle = new System.Threading.AutoResetEvent(false);
+            Console.CancelKeyPress += (object sender, ConsoleCancelEventArgs e) =>
+            {
+
+                e.Cancel = true;
+                waitHandle.Set();
+
+            };
+
+            waitHandle.WaitOne();
 
         }
     }

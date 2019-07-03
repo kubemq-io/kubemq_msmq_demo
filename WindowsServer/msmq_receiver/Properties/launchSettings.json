@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "msmq_receiver": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "KUBEMQTIMEOUT": "1000",
+        "KUBEMQSADDRESS": "104.47.142.90:50000",
+        "KUBEMQSCHANNEL": "Tradency.KubeMQ.0"
+      }
+    }
+  }
+}
