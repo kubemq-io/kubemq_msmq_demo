@@ -69,7 +69,7 @@ namespace KubeMQ.MSMQSDK.Messages
                 MSMQMeta meta = new MSMQMeta("RegisterReceive", this.Path, "N/A", QueueChannelName);
                 try
                 {
-                    responder = new Responder(instance.KubeMQ);
+                    responder = new Responder(_KubeMSMQInitiator.KubeMQ);
                     responder.SubscribeToRequests(GetSubscribeRequest(),HandleIncomingRequest);
                     receiveCompleted -= value;
                     receiveCompleted += value;

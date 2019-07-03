@@ -11,8 +11,7 @@ namespace msmq_receiver
         const string kubemqAddress = "104.47.142.90:50000";
         static void Main(string[] args)
         {
-          new KubeMQ.MSMQSDK.KubeMSMQInitiator();
-            // this is an framework example soon to be converted to net core, this will replace msmq_receiver project
+           // this is an framework example soon to be converted to net core, this will replace msmq_receiver project
             MessageQueue queue = null;
             try
             {
@@ -27,7 +26,7 @@ namespace msmq_receiver
             MessageQueue sendqueue = null;
             try
             {
-                sendqueue = new MessageQueue(@".\private$\q1");
+                sendqueue = new MessageQueue(@".\private$\receiver");
             }
             catch (Exception ex)
             {
