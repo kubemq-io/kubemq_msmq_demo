@@ -12,7 +12,7 @@ namespace msmq_receiver
         /// <summary>
         /// this is the KubeMQ message bus address located on Azure
         /// </summary>
-        private static string ClientID = Environment.GetEnvironmentVariable("CLIENT") ?? $"pub_Demo_{Environment.MachineName}";
+        private static string ClientID = Environment.GetEnvironmentVariable("CLIENT") ?? $"MSMQ_Demo_{Environment.MachineName}";
         private static string PubChannel = Environment.GetEnvironmentVariable("PUBCHANNEL") ?? "ratesstore";      
         private static string CMDChannel = Environment.GetEnvironmentVariable("CMDCHANNEL") ?? "rateCMD";
         private static string RateMQ = Environment.GetEnvironmentVariable("RateMQ") ?? @".\private$\raqueue";
@@ -96,7 +96,7 @@ namespace msmq_receiver
                     receiveMQ.BeginReceive();
                 });
 
-                sendMQ.BeginReceive();
+                receiveMQ.BeginReceive();
             });
 
 

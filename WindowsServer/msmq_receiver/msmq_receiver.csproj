@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="KubeMQ.MSMQ.SDK" Version="1.0.1" />
     <PackageReference Include="KubeMQ.SDK.csharp" Version="1.0.4" />
   </ItemGroup>
 

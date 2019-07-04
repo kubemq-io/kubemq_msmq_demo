@@ -2,15 +2,17 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
-    <Authors>Tradency</Authors>
-    <Company>Tradency</Company>
+    <Authors>KubeMQ</Authors>
+    <Company>KubeMQ</Company>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <AssemblyName>Tradency.KubeMSMQ.SDK.csharp</AssemblyName>
-    <RootNamespace>Tradency.KubeMSMQ.SDK.csharp</RootNamespace>
-    <Description>.NET Client for KubeMSMQ</Description>
-    <AssemblyVersion>1.0.1.0</AssemblyVersion>
-    <FileVersion>1.0.1.0</FileVersion>
+    <AssemblyName>KubeMQ.MSMQ.SDK.csharp</AssemblyName>
+    <RootNamespace>KubeMQ.MSMQ.SDK.csharp</RootNamespace>
+    <Description>.NET Client for KubeMQ.MSMQ</Description>
+    <AssemblyVersion>1.0.2.0</AssemblyVersion>
+    <FileVersion>1.0.2.0</FileVersion>
     <Version>1.0.1</Version>
+    <PackageId>KubeMQ.MSMQ.SDK</PackageId>
+    <Product>KubeMQ.MSMQ.SDK</Product>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
