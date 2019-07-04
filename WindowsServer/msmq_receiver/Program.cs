@@ -1,6 +1,7 @@
 ﻿using KubeMQ.MSMQSDK.Messages;
 using KubeMQ.MSMQSDK.SDK.csharp.Events;
 using System;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -48,17 +49,21 @@ namespace msmq_receiver
                 queue.ReceiveCompleted += new ReceiveCompletedEventHandler((sender, eventArgs) =>
                 {
                     //eventArgs.Message.Formatter = new XmlMessageFormatter(new Type[]
-                    //{typeof(String)});
-                    Console.WriteLine(eventArgs.Message.Body.ToString());
+                    //{typeof(String)});            
+                    System.IO.Stream stream = new System.IO.MemoryStream(eventArgs.Message.BodyStream);
+                    StreamReader reader = new StreamReader(stream);
+                    string msgBody = reader.ReadToEnd();
+                    Console.WriteLine(msgBody);
 
                     channel.SendEvent(new KubeMQ.SDK.csharp.Events.Event
                     {
-                        Body = Encoding.UTF8.GetBytes(Newtonsoft.Json.JsonConvert.SerializeObject(eventArgs.Message.Body)),
+                        Body = Encoding.UTF8.GetBytes(Newtonsoft.Json.JsonConvert.SerializeObject(msgBody)),
                         Metadata = "Rate message json encoded in UTF8",
                         EventID = eventArgs.Message.Id
                     });
                     queue.BeginReceive();
                 });
+
                 queue.BeginReceive();
             });
 
