@@ -108,7 +108,7 @@ namespace KubeMQ.MSMQSDK
         private  string GetKubeMQAddress()
         {
             // Get environment variable 'KUBEMQSADDRESS' from configuration 
-            string KubeMQAddress = Environment.GetEnvironmentVariable("KUBEMQSADDRESS");
+            string KubeMQAddress = Environment.GetEnvironmentVariable("KubeMQServerAddress");
 
             if (string.IsNullOrEmpty(KubeMQAddress))
             {
