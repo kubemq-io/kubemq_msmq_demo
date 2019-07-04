@@ -10,7 +10,7 @@ using System.Timers;
 namespace msmq_generator
 {
     /// <summary>
-    /// Manager run the progrem main logic
+    /// Manager run the program main logic
     /// </summary>
     class Manager
     {
@@ -69,7 +69,7 @@ namespace msmq_generator
                 {"Vespene gas",new Rates("Vespene gas",7) }
             };
             Console.WriteLine($"Starting to generate rates, will send them to {SendPath}");
-            SetTimer();
+            SetRateTimer();
         }
         /// <summary>
         /// Starts receiving request from MSMQ under selected path
@@ -107,46 +107,49 @@ namespace msmq_generator
             messageQueue.BeginReceive();
         }
 
+        /// <summary>
+        /// On receiving message from Queue , main use to active or deactivate rates 
+        /// </summary>
         private void MyReciveCompleted(object source, ReceiveCompletedEventArgs asyncResult)
         {
             Console.WriteLine($"Received message to queue");
-            // Connect to the queue.
             MessageQueue mq = (MessageQueue)source;
-
-            // End the asynchronous Receive operation.
             Message m = mq.EndReceive(asyncResult.AsyncResult);
             RateRequest request = new RateRequest();
-            // Display message information on the screen.
             try
             {
-
                 request= JsonConvert.DeserializeObject<RateRequest>((string)m.Body);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Message: {(string)m.Body}");
-                throw;
+                Console.WriteLine($"Failed to parse active/inactive request on {ex}");
             }
-            Console.WriteLine($"Message: {(string)m.Body}");
-            switch (request.Active)
+            if (rateCollection.ContainsKey(request.Name))
             {
-                case true:
+                Console.WriteLine($"Changing {request.Name} active to:{request.Active}");
+                switch (request.Active)
+                {
+                    case true:
                         rateCollection[request.Name].isActive = true;
-                    break;
-                case false:
-                    rateCollection[request.Name].isActive = false;
-                    break;
-                default:
-                    break;
+                        break;
+                    case false:
+                        rateCollection[request.Name].isActive = false;
+                        break;
+                    default:
+                        break;
+                }
             }
-            // Restart the asynchronous Receive operation.
             mq.BeginReceive();
 
             return;
         }
 
 
-        private void SetTimer()
+
+        /// <summary>
+        /// Set the rate timer.
+        /// </summary>
+        private void SetRateTimer()
         {
 
             timer = new System.Timers.Timer(1000);
@@ -156,6 +159,9 @@ namespace msmq_generator
             timer.Enabled = true;
         }
 
+        /// <summary>
+        /// Create and send the active rate report.
+        /// </summary>
         private void OnRateSend(Object source, ElapsedEventArgs e)
         {
             List<SenderMessageBody> ratesList = new List<SenderMessageBody>();
