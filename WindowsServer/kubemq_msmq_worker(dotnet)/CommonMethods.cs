@@ -21,14 +21,19 @@ namespace MSMQWorkerConsole
         private ConcurrentDictionary<string, System.Messaging.MessageQueue> OpenRecieveQueues;
         private ILogger<CommonMethods> _logger;
         private Initiator initiator = new Initiator();
+        private int _timeout;
         private readonly IConfiguration _config;
         private string clientID;
         public CommonMethods(ILogger<CommonMethods> logger, IConfiguration configuration) :base()
         {
             _logger = logger;
             _config = configuration;
-            initiator = new Initiator(_config["Address"]);
+            initiator = new Initiator(_config["KubeMQ:Address"]);
             clientID = $"Client:{GetChannelName()}";
+             if(!int.TryParse(_config["KubeMQ:Timeout"],out _timeout))
+            {
+                _timeout = 1000;
+            }
             OpenPeekQueues = new ConcurrentDictionary<string, System.Messaging.MessageQueue>();
             OpenRecieveQueues = new ConcurrentDictionary<string, System.Messaging.MessageQueue>();
         }
@@ -361,7 +366,8 @@ namespace MSMQWorkerConsole
                     CacheTTL=0,
                     Channel=channelToReturnTo,
                     ClientID= clientID,
-                    RequestType=RequestType.Query
+                    RequestType=RequestType.Query,
+                    Timeout = _timeout 
                 });
             }
             catch (Exception ex)
