@@ -16,13 +16,15 @@ namespace msmq_generator
         internal string rateName;
         internal double buy;
         internal double sell;
+        internal int id;
         private static System.Timers.Timer rateChanger;
-        public Rates(string pName)
+        public Rates(string pName,int pId)
         {
             isActive = true;
             rateName = pName;
             buy = GetRateInitalValue();
             sell = GetRateInitalValue();
+            id = pId;
             SetRate();
         }
         private void SetRate()

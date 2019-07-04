@@ -357,7 +357,10 @@ namespace KubeMQ.MSMQSDK.Messages
                 Metadata = "OK",
                 Body = Converter.ToByteArray("OK"),
                 CacheHit = false,
-                ClientID = $"MSMQWorker{Path}"
+                ClientID = $"MSMQWorker{Path}",
+                Timestamp=DateTime.UtcNow,
+                Executed=true,
+                Error=""
             };
         }
 
