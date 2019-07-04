@@ -4,8 +4,8 @@
       "commandName": "Project",
       "environmentVariables": {
         "KUBEMQTIMEOUT": "10000",
-        "KUBEMQSADDRESS": "104.47.142.90:50000",
-        "KUBEMQSCHANNEL": "Tradency.KubeMQ.0"
+        "KUBEMQSCHANNEL": "Tradency.KubeMQ.0",
+        "KubeMQServerAddress": "104.47.142.90:50000"
       }
     }
   }
