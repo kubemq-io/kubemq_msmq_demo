@@ -46,7 +46,7 @@ namespace msmq_receiver
 
             Task msmqsub = Task.Run(() =>
             {
-                /// Init a new sender channel on the KubeMQ to publish recived rates
+                /// Init a new sender channel on the KubeMQ to publish received rates
           
 
                 KubeMQ.SDK.csharp.Events.Channel channel = new KubeMQ.SDK.csharp.Events.Channel(new KubeMQ.SDK.csharp.Events.ChannelParameters
@@ -55,7 +55,7 @@ namespace msmq_receiver
                     ClientID = ClientID,
                     Store = true
                 });
-                Console.WriteLine($"[Demo][msmqsub] init KubeMQ publish presistance channel  PubChannel:{PubChannel}");
+                Console.WriteLine($"[Demo][msmqsub] init KubeMQ publish persistence channel  PubChannel:{PubChannel}");
 
                 /// KubeMQ msmq message handler
                 receiveMQ.ReceiveCompleted += new ReceiveCompletedEventHandler((sender, eventArgs) =>
@@ -68,7 +68,7 @@ namespace msmq_receiver
                     try
                     {
                         msgBody = reader.ReadToEnd();
-                        Console.WriteLine($"[Demo][msmqsub] Msg recived from RateMQ {sender}:{msgBody}");
+                        Console.WriteLine($"[Demo][msmqsub] Msg received from RateMQ {sender}:{msgBody}");
                     }
                     catch (Exception ex )
                     {
@@ -102,7 +102,7 @@ namespace msmq_receiver
 
 
 
-            //start a task for enqueue comand messages to MSMSQ using KubeMQ MSMQ SDK
+            //start a task for enqueue command messages to MSMSQ using KubeMQ MSMQ SDK
             Task msmqcmd = Task.Run(() =>
             {
                 /// Init a new CommandQuery subscriber on the KubeMQ to receive commands
