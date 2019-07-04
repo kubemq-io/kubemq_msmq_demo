@@ -15,7 +15,7 @@ namespace msmq_receiver
             MessageQueue queue = null;
             try
             {
-                queue = new MessageQueue(@".\private$\RAQueue");
+                queue = new MessageQueue(@".\private$\raqueue");
 
             }
             catch (Exception ex)
@@ -47,7 +47,8 @@ namespace msmq_receiver
 
                 queue.ReceiveCompleted += new ReceiveCompletedEventHandler((sender, eventArgs) =>
                 {
-                    eventArgs.Message.Formatter = new BinaryMessageFormatter();
+                    //eventArgs.Message.Formatter = new XmlMessageFormatter(new Type[]
+                    //{typeof(String)});
                     Console.WriteLine(eventArgs.Message.Body.ToString());
 
                     channel.SendEvent(new KubeMQ.SDK.csharp.Events.Event
@@ -78,7 +79,8 @@ namespace msmq_receiver
                         object body = Encoding.UTF8.GetString(request.Body);
                         sendqueue.Send(new Message
                         {
-                            Formatter = new BinaryMessageFormatter(),
+                    //        Formatter =  new XmlMessageFormatter(new Type[]
+                    //{typeof(String)}),
                             Body = body
                         });
 

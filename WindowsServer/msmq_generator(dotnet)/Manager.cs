@@ -120,6 +120,7 @@ namespace msmq_generator
             // Display message information on the screen.
             try
             {
+
                 request= JsonConvert.DeserializeObject<RateRequest>((string)m.Body);
             }
             catch (Exception ex)
@@ -192,18 +193,18 @@ namespace msmq_generator
     [Serializable]
     class SenderMessageBody
     {
-        internal string Name { get; set; }
-        internal string Ask { get; set; }
-        internal string Bid { get; set; }
+        public string Name { get; set; }
+        public string Ask { get; set; }
+        public string Bid { get; set; }
     }
 
     /// <summary>
     /// Request Receiving from the Client
     /// </summary>
     [Serializable]
-    class RateRequest
+    public class RateRequest
     {
-        internal string Name { get; set; }
-        internal bool Active { get; set; }
+        public string Name { get; set; }
+        public bool Active { get; set; }
     }
 }
