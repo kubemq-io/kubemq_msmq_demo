@@ -58,20 +58,21 @@ namespace msmq_receiver
 
                 /// KubeMQ msmq message handler
                 receiveMQ.ReceiveCompleted += new ReceiveCompletedEventHandler((sender, eventArgs) =>
-                {
-                  
-                    
+                {                    
+                    eventArgs.Message.Formatter = new BinaryMessageFormatter();
+                   
                     System.IO.Stream stream = new System.IO.MemoryStream(eventArgs.Message.BodyStream);
                     StreamReader reader = new StreamReader(stream);
                     string msgBody = reader.ReadToEnd();
-                    Console.WriteLine(msgBody);
+                    Console.WriteLine($"[Demo][msmqsub] Msg recived from RateMQ {sender}:{msgBody}");
 
                     channel.SendEvent(new KubeMQ.SDK.csharp.Events.Event
                     {
-                        Body = Encoding.UTF8.GetBytes(Newtonsoft.Json.JsonConvert.SerializeObject(msgBody)),
+                        Body = Encoding.UTF8.GetBytes(msgBody),
                         Metadata = "Rate message json encoded in UTF8",
                         EventID = eventArgs.Message.Id
                     });
+                    Console.WriteLine($"[Demo][msmqsub] SendEvent {PubChannel}:{msgBody}");
                     receiveMQ.BeginReceive();
                 });
 
