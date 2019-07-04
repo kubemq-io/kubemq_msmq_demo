@@ -48,8 +48,8 @@ namespace msmq_receiver
 
                 queue.ReceiveCompleted += new ReceiveCompletedEventHandler((sender, eventArgs) =>
                 {
-                    //eventArgs.Message.Formatter = new XmlMessageFormatter(new Type[]
-                    //{typeof(String)});            
+                    eventArgs.Message.Formatter = new BinaryMessageFormatter();
+                    //{typeof(String)});
                     System.IO.Stream stream = new System.IO.MemoryStream(eventArgs.Message.BodyStream);
                     StreamReader reader = new StreamReader(stream);
                     string msgBody = reader.ReadToEnd();

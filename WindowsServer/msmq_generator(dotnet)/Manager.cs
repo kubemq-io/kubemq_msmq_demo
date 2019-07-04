@@ -60,13 +60,13 @@ namespace msmq_generator
             rateCollection = new Dictionary<string, Rates>
             {
 
-                {"Golden Coin", new Rates("Golden Coin") },
-                {"GIL",new Rates("GIL") },
-                {"Zenny", new Rates("Zenny") },
-                {"Dollar", new Rates("Dollar") },
-                {"Red Orbs", new Rates("Red Orbs") },
-                {"Credit", new Rates("Credit") },
-                {"Vespene gas",new Rates("Vespene gas") }
+                {"Golden Coin", new Rates("Golden Coin",1) },
+                {"GIL",new Rates("GIL",2) },
+                {"Zenny", new Rates("Zenny",3) },
+                {"Dollar", new Rates("Dollar",4) },
+                {"Red Orbs", new Rates("Red Orbs",5) },
+                {"Credit", new Rates("Credit",6) },
+                {"Vespene gas",new Rates("Vespene gas",7) }
             };
             Console.WriteLine($"Starting to generate rates, will send them to {SendPath}");
             SetTimer();
@@ -102,8 +102,7 @@ namespace msmq_generator
                 }
             }
             MessageQueue messageQueue = new MessageQueue(ListenPath);
-            messageQueue.Formatter = new XmlMessageFormatter(new Type[]
-            {typeof(String)});
+            messageQueue.Formatter = new BinaryMessageFormatter();
             messageQueue.ReceiveCompleted += new ReceiveCompletedEventHandler((s, a) => MyReciveCompleted(s, a));
             messageQueue.BeginReceive();
         }
@@ -150,40 +149,44 @@ namespace msmq_generator
         private void SetTimer()
         {
 
-            timer = new System.Timers.Timer(800);
+            timer = new System.Timers.Timer(1000);
 
-            timer.Elapsed += OnTimedEvent;
+            timer.Elapsed += OnRateSend;
             timer.AutoReset = true;
             timer.Enabled = true;
         }
 
-        private void OnTimedEvent(Object source, ElapsedEventArgs e)
+        private void OnRateSend(Object source, ElapsedEventArgs e)
         {
+            List<SenderMessageBody> ratesList = new List<SenderMessageBody>();
             foreach (var rate in rateCollection)
             {
                 if (rate.Value.isActive)
                 {
                     SenderMessageBody message = new SenderMessageBody()
                     {
+                        ID=rate.Value.id,
                         Name = rate.Value.rateName,
                         Ask = rate.Value.buy.ToString(),
                         Bid = rate.Value.sell.ToString()
                     };
-                    try
-                    {
-                        string strLabel = "";
-
-
-                        System.Messaging.Message newMessage = new System.Messaging.Message(message, new BinaryMessageFormatter());
-                        newMessage.Label = strLabel;
-                        MessageQueue queue = new MessageQueue(SendPath, QueueAccessMode.Send);
-                        queue.Send(newMessage, MessageQueueTransactionType.None);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Failed to send rates to queue on ex {ex}");
-                    }
+                    ratesList.Add(message);
                 }
+            }
+            try
+            {
+                string strLabel = "";
+
+
+                System.Messaging.Message newMessage = new System.Messaging.Message();
+                newMessage.BodyStream = new MemoryStream(Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(ratesList)));
+                newMessage.Label = strLabel;
+                MessageQueue queue = new MessageQueue(SendPath, QueueAccessMode.Send);
+                queue.Send(newMessage, MessageQueueTransactionType.None);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to send rates to queue on ex {ex}");
             }
         }
     }
@@ -193,6 +196,7 @@ namespace msmq_generator
     [Serializable]
     class SenderMessageBody
     {
+        public int ID { get; set; }
         public string Name { get; set; }
         public string Ask { get; set; }
         public string Bid { get; set; }
