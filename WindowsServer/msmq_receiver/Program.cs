@@ -47,7 +47,7 @@ namespace msmq_receiver
             Task msmqsub = Task.Run(() =>
             {
                 /// Init a new sender channel on the KubeMQ to publish recived rates
-                Console.WriteLine($"[Demo][msmqsub] init KubeMQ publish presistance channel  PubChannel:{PubChannel}");
+          
 
                 KubeMQ.SDK.csharp.Events.Channel channel = new KubeMQ.SDK.csharp.Events.Channel(new KubeMQ.SDK.csharp.Events.ChannelParameters
                 {
@@ -55,6 +55,7 @@ namespace msmq_receiver
                     ClientID = ClientID,
                     Store = true
                 });
+                Console.WriteLine($"[Demo][msmqsub] init KubeMQ publish presistance channel  PubChannel:{PubChannel}");
 
                 /// KubeMQ msmq message handler
                 receiveMQ.ReceiveCompleted += new ReceiveCompletedEventHandler((sender, eventArgs) =>
@@ -63,16 +64,35 @@ namespace msmq_receiver
                    
                     System.IO.Stream stream = new System.IO.MemoryStream(eventArgs.Message.BodyStream);
                     StreamReader reader = new StreamReader(stream);
-                    string msgBody = reader.ReadToEnd();
-                    Console.WriteLine($"[Demo][msmqsub] Msg recived from RateMQ {sender}:{msgBody}");
-
-                    channel.SendEvent(new KubeMQ.SDK.csharp.Events.Event
+                    string msgBody = null;
+                    try
                     {
-                        Body = Encoding.UTF8.GetBytes(msgBody),
-                        Metadata = "Rate message json encoded in UTF8",
-                        EventID = eventArgs.Message.Id
-                    });
-                    Console.WriteLine($"[Demo][msmqsub] SendEvent {PubChannel}:{msgBody}");
+                        msgBody = reader.ReadToEnd();
+                        Console.WriteLine($"[Demo][msmqsub] Msg recived from RateMQ {sender}:{msgBody}");
+                    }
+                    catch (Exception ex )
+                    {
+                        Console.WriteLine($"[Demo][msmqsub] Error parse msg from RateMQ {sender}:{ex.Message}");                        
+                    }
+
+                    if (msgBody != null)
+                    {
+                        try
+                        {
+                            channel.SendEvent(new KubeMQ.SDK.csharp.Events.Event
+                            {
+                                Body = Encoding.UTF8.GetBytes(msgBody),
+                                Metadata = "Rate message json encoded in UTF8",
+                                EventID = eventArgs.Message.Id
+                            });
+                            Console.WriteLine($"[Demo][msmqsub] SendEvent {PubChannel}:{msgBody}");
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"[Demo][msmqsub] Error parse msg from RateMQ {sender}:{ex.Message}");
+                        }
+                    }
+                   
                     receiveMQ.BeginReceive();
                 });
 
@@ -86,9 +106,12 @@ namespace msmq_receiver
             Task msmqcmd = Task.Run(() =>
             {
                 /// Init a new CommandQuery subscriber on the KubeMQ to receive commands
-                Console.WriteLine($"[Demo][msmqcmd] init KubeMQ publish presistance channel  PubChannel:{PubChannel}");
+             
 
                 KubeMQ.SDK.csharp.CommandQuery.Responder responder = new KubeMQ.SDK.csharp.CommandQuery.Responder();
+
+                Console.WriteLine($"[Demo][msmqcmd] init KubeMQ CommandQuery subscriber :{CMDChannel}");
+
                 responder.SubscribeToRequests(new KubeMQ.SDK.csharp.Subscription.SubscribeRequest()
                 {
                     SubscribeType = KubeMQ.SDK.csharp.Subscription.SubscribeType.Commands,
@@ -97,26 +120,49 @@ namespace msmq_receiver
 
                 }, (KubeMQ.SDK.csharp.CommandQuery.RequestReceive request) =>
                 {
+                     Console.WriteLine($"[Demo][msmqcmd] CommandQuery RequestReceive :{request}");
+                    KubeMQ.SDK.csharp.CommandQuery.Response response;
                     if (request != null)
                     {
                         string strMsg = string.Empty;
                         object body = Encoding.UTF8.GetString(request.Body);
-                        sendMQ.Send(new Message
-                        {                   
-                            Body = body
-                        });
-
+                        try
+                        {
+                            sendMQ.Send(new Message
+                            {
+                                Body = body
+                            });
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"[Demo][msmqcmd] Error CommandQuery send response :{ex.Message}");
+                            response = new KubeMQ.SDK.csharp.CommandQuery.Response(request)
+                            {
+                                Body = Encoding.UTF8.GetBytes(ex.Message),
+                                CacheHit = false,
+                                Error = $"Recived error from KubeMQ.MSMQ {ex.Message}",
+                                ClientID = ClientID,
+                                Executed = false,
+                                Metadata = "Bad",
+                                Timestamp = DateTime.UtcNow
+                                
+                            };
+                            Console.WriteLine($"[Demo][msmqcmd] CommandQuery send response :{response}");
+                            return response;
+                        }                      
                     }
-                    KubeMQ.SDK.csharp.CommandQuery.Response response = new KubeMQ.SDK.csharp.CommandQuery.Response(request)
+
+                    response = new KubeMQ.SDK.csharp.CommandQuery.Response(request)
                     {
                         Body = Encoding.UTF8.GetBytes("o.k"),
                         CacheHit = false,
-                        Error = "None",
+                        Error = (request != null) ?"None": "Request received was null",
                         ClientID = ClientID,
-                        Executed = true,
-                        Metadata = "OK",
+                        Executed = (request != null),
+                        Metadata = (request != null) ? "OK" : "Bad",
                         Timestamp = DateTime.UtcNow,
                     };
+                    Console.WriteLine($"[Demo][msmqcmd] CommandQuery send response :{response}");
                     return response;
                 });
 

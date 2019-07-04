@@ -3,19 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.705
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "msmq_generator", "msmq_generator(dotnet)\msmq_generator.csproj", "{88634F26-5C82-40DE-9724-D0FB8DEA7AD7}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "kubemq_msmq_sdk", "kubemq_msmq_sdk(dotnetstandard)\kubemq_msmq_sdk.csproj", "{828DE945-D58A-48F8-97F8-9E6D66163C99}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kubme_msmq_worker", "kubemq_msmq_worker(dotnet)\kubme_msmq_worker.csproj", "{43A062AD-C769-4C4D-BA67-7B452DC45918}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "kubemq_msmq_worker_tester", "kubemq_msmq_worker_tester\kubemq_msmq_worker_tester.csproj", "{47196097-4568-43E1-A200-4ECC8FD5B60A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "msmq_receiver", "msmq_receiver\msmq_receiver.csproj", "{739977D5-FB93-4EBE-9A41-3D31C942F91D}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "msmq_reciver_win", "msmq_reciver_win\msmq_reciver_win.csproj", "{5176EFAE-977A-4D40-9970-04EDCAC4D84D}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "messagebody", "messagebody\messagebody.csproj", "{7345A4A0-DE33-4A99-8796-3C460997049A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "msmq_receiver", "msmq_receiver\msmq_receiver.csproj", "{739977D5-FB93-4EBE-9A41-3D31C942F91D}"
 EndProject
 Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "website", "website\", "{44158A85-6F33-4A81-A521-921F1A93B9F1}"
 	ProjectSection(WebsiteProperties) = preProject
@@ -44,10 +38,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{88634F26-5C82-40DE-9724-D0FB8DEA7AD7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{88634F26-5C82-40DE-9724-D0FB8DEA7AD7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{88634F26-5C82-40DE-9724-D0FB8DEA7AD7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{88634F26-5C82-40DE-9724-D0FB8DEA7AD7}.Release|Any CPU.Build.0 = Release|Any CPU
 		{828DE945-D58A-48F8-97F8-9E6D66163C99}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{828DE945-D58A-48F8-97F8-9E6D66163C99}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{828DE945-D58A-48F8-97F8-9E6D66163C99}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -64,14 +54,6 @@ Global
 		{739977D5-FB93-4EBE-9A41-3D31C942F91D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{739977D5-FB93-4EBE-9A41-3D31C942F91D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{739977D5-FB93-4EBE-9A41-3D31C942F91D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5176EFAE-977A-4D40-9970-04EDCAC4D84D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5176EFAE-977A-4D40-9970-04EDCAC4D84D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5176EFAE-977A-4D40-9970-04EDCAC4D84D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5176EFAE-977A-4D40-9970-04EDCAC4D84D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7345A4A0-DE33-4A99-8796-3C460997049A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7345A4A0-DE33-4A99-8796-3C460997049A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7345A4A0-DE33-4A99-8796-3C460997049A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7345A4A0-DE33-4A99-8796-3C460997049A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{44158A85-6F33-4A81-A521-921F1A93B9F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{44158A85-6F33-4A81-A521-921F1A93B9F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{44158A85-6F33-4A81-A521-921F1A93B9F1}.Release|Any CPU.ActiveCfg = Debug|Any CPU

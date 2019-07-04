@@ -40,8 +40,7 @@ namespace msmq_reciver_win
 
                 KubeMQ.SDK.csharp.Events.Channel channel = new KubeMQ.SDK.csharp.Events.Channel(new KubeMQ.SDK.csharp.Events.ChannelParameters
                 {
-                    ChannelName = "ratesstore",
-                    KubeMQAddress = "104.47.142.90:50000",
+                    ChannelName = "ratesstore",                 
                     ClientID = "msmq_reciver",
                     Store = true
                 });
@@ -64,7 +63,7 @@ namespace msmq_reciver_win
 
             Task msmqcmd = Task.Run(() =>
             {
-                KubeMQ.SDK.csharp.CommandQuery.Responder responder = new KubeMQ.SDK.csharp.CommandQuery.Responder("192.168.1.189:50000");
+                KubeMQ.SDK.csharp.CommandQuery.Responder responder = new KubeMQ.SDK.csharp.CommandQuery.Responder();
                 responder.SubscribeToRequests(new KubeMQ.SDK.csharp.Subscription.SubscribeRequest()
                 {
                     SubscribeType = KubeMQ.SDK.csharp.Subscription.SubscribeType.Commands,
