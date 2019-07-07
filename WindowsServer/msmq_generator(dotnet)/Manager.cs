@@ -15,12 +15,14 @@ namespace msmq_generator
     /// </summary>
     class Manager
     {
+        public static Random rnd;
         private Dictionary<string,Rates> rateCollection;
         private string ListenPath;
         private string SendPath;
         private static System.Timers.Timer timer;
         public Manager(string pListenQueuePath, string pSendRateQueue)
         {
+            rnd = new Random();
             ListenPath = pListenQueuePath;
             SendPath = pSendRateQueue;
             StartListen();
@@ -60,7 +62,6 @@ namespace msmq_generator
             }
             rateCollection = new Dictionary<string, Rates>
             {
-
                 {"Golden Coin", new Rates("Golden Coin",1) },
                 {"GIL",new Rates("GIL",2) },
                 {"Zenny", new Rates("Zenny",3) },

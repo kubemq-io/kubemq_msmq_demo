@@ -38,20 +38,29 @@ namespace msmq_generator
 
         private void OnTimedEvent(object sender, ElapsedEventArgs e)
         {
-            buy = buy * GetDoubleRandomNumber(0.9, 1.1);
-            sell= sell * GetDoubleRandomNumber(0.9, 1.1);
+            buy =  GetDoubleRandomNumber(0.995, 1.005, buy);
+            sell=  GetDoubleRandomNumber(0.995, 1.005, sell);
         }
 
-        private double GetDoubleRandomNumber(double minimum, double maximum)
+        private double GetDoubleRandomNumber(double minimum, double maximum,double currentValue)
         {
-            Random random = new Random();
-            return random.NextDouble() * (maximum - minimum) + minimum;
+            double randDouble= Manager.rnd.NextDouble() * (maximum - minimum) + minimum;
+            currentValue = currentValue * randDouble;
+            if (currentValue < 2000)
+            {
+                currentValue = 2200;
+            }
+            else if (currentValue > 10000)
+            {
+                currentValue = 9800;
+            }
+            return currentValue;
         }
 
         private int GetRateInitalValue()
         {
             Random random = new Random();
-            return random.Next(4500, 5500);
+            return random.Next(4500, 7800);
         }
     }
 }
