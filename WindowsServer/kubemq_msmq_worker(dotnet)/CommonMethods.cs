@@ -165,7 +165,9 @@ namespace MSMQWorkerConsole
             try
             {
                 System.Messaging.MessageQueue myQueue = new System.Messaging.MessageQueue(meta.Path);
+                myQueue.Formatter = new ActiveXMessageFormatter();
                 System.Messaging.Message MyMessage = MessageConvert.ConvertToSystemMessage(message);
+                MyMessage.Formatter = new ActiveXMessageFormatter();
                 myQueue.Send(MyMessage);
                 _logger.LogDebug(string.Format("Added message to Queue:{0}", meta.Path));
                 resultModel.Result = (int)ResultsEnum.AddedToQueue;

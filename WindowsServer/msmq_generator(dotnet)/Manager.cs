@@ -6,6 +6,7 @@ using System.Linq;
 using System.Messaging;
 using System.Text;
 using System.Timers;
+using System.Xml.Linq;
 
 namespace msmq_generator
 {
@@ -114,30 +115,32 @@ namespace msmq_generator
         {
             Console.WriteLine($"Received message to queue");
             MessageQueue mq = (MessageQueue)source;
-            Message m = mq.EndReceive(asyncResult.AsyncResult);
+            asyncResult.Message.Formatter = new ActiveXMessageFormatter();
+
+            System.IO.Stream a = new System.IO.MemoryStream(ReadFully(asyncResult.Message.BodyStream));
             RateRequest request = new RateRequest();
             try
             {
-                request= JsonConvert.DeserializeObject<RateRequest>((string)m.Body);
+                request = JsonConvert.DeserializeObject<RateRequest>(asyncResult.Message.Body.ToString());
+                if (rateCollection.ContainsKey(request.Name))
+                {
+                    Console.WriteLine($"Changing {request.Name} active to:{request.Active}");
+                    switch (request.Active)
+                    {
+                        case true:
+                            rateCollection[request.Name].isActive = true;
+                            break;
+                        case false:
+                            rateCollection[request.Name].isActive = false;
+                            break;
+                        default:
+                            break;
+                    }
+                }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Failed to parse active/inactive request on {ex}");
-            }
-            if (rateCollection.ContainsKey(request.Name))
-            {
-                Console.WriteLine($"Changing {request.Name} active to:{request.Active}");
-                switch (request.Active)
-                {
-                    case true:
-                        rateCollection[request.Name].isActive = true;
-                        break;
-                    case false:
-                        rateCollection[request.Name].isActive = false;
-                        break;
-                    default:
-                        break;
-                }
             }
             mq.BeginReceive();
 
@@ -193,6 +196,20 @@ namespace msmq_generator
             catch (Exception ex)
             {
                 Console.WriteLine($"Failed to send rates to queue on ex {ex}");
+            }
+        }
+
+        public static byte[] ReadFully(Stream input)
+        {
+            byte[] buffer = new byte[16 * 1024];
+            using (MemoryStream ms = new MemoryStream())
+            {
+                int read;
+                while ((read = input.Read(buffer, 0, buffer.Length)) > 0)
+                {
+                    ms.Write(buffer, 0, read);
+                }
+                return ms.ToArray();
             }
         }
     }
