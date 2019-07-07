@@ -43,8 +43,8 @@ namespace msmq_receiver
 
 
             //start a task for dequeue messages from MSMSQ using KubeMQ MSMQ SDK
-
-            Task msmqsub = Task.Run(() =>
+            //DequeueAndEventPub task implementing KubeMQ.MSMQ.SDK will request a Dequeue from KubeMQ MSMQ Worker publish the message to presistant KubeMQ channel.
+            Task DequeueAndEventPub = Task.Run(() =>
             {
                 /// Init a new sender channel on the KubeMQ to publish received rates
           
@@ -103,7 +103,7 @@ namespace msmq_receiver
 
 
             //start a task for enqueue command messages to MSMSQ using KubeMQ MSMQ SDK
-            Task msmqcmd = Task.Run(() =>
+            Task CommandHanleAndEequeue = Task.Run(() =>
             {
                 /// Init a new CommandQuery subscriber on the KubeMQ to receive commands
              
@@ -120,46 +120,41 @@ namespace msmq_receiver
 
                 }, (KubeMQ.SDK.csharp.CommandQuery.RequestReceive request) =>
                 {
-                     Console.WriteLine($"[Demo][msmqcmd] CommandQuery RequestReceive :{request}");
+                    Console.WriteLine($"[Demo][msmqcmd] CommandQuery RequestReceive :{request}");
                     KubeMQ.SDK.csharp.CommandQuery.Response response;
-                    if (request != null)
+          
+                    string strMsg = string.Empty;
+                    object body = Encoding.UTF8.GetString(request.Body);
+                    try
                     {
-                        string strMsg = string.Empty;
-                        object body = Encoding.UTF8.GetString(request.Body);
-                        try
+                        sendMQ.Send(new Message
                         {
-                            sendMQ.Send(new Message
-                            {
-                                Body = body
-                            });
-                        }
-                        catch (Exception ex)
+                            Body = body
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[Demo][msmqcmd] Error CommandQuery send response :{ex.Message}");
+                        response = new KubeMQ.SDK.csharp.CommandQuery.Response(request)
                         {
-                            Console.WriteLine($"[Demo][msmqcmd] Error CommandQuery send response :{ex.Message}");
-                            response = new KubeMQ.SDK.csharp.CommandQuery.Response(request)
-                            {
-                                Body = Encoding.UTF8.GetBytes(ex.Message),
-                                CacheHit = false,
-                                Error = $"Recived error from KubeMQ.MSMQ {ex.Message}",
-                                ClientID = ClientID,
-                                Executed = false,
-                                Metadata = "Bad",
-                                Timestamp = DateTime.UtcNow
-                                
-                            };
-                            Console.WriteLine($"[Demo][msmqcmd] CommandQuery send response :{response}");
-                            return response;
-                        }                      
+                            Body = Encoding.UTF8.GetBytes(ex.Message),
+                            Error = $"Recived error from KubeMQ.MSMQ {ex.Message}",
+                            ClientID = ClientID,
+                            Metadata = "Bad",
+                            Timestamp = DateTime.UtcNow
+
+                        };
+                        Console.WriteLine($"[Demo][msmqcmd] CommandQuery send response :{response}");
+                        return response;
                     }
 
                     response = new KubeMQ.SDK.csharp.CommandQuery.Response(request)
                     {
                         Body = Encoding.UTF8.GetBytes("o.k"),
-                        CacheHit = false,
-                        Error = (request != null) ?"None": "Request received was null",
+                        Error = "None",
                         ClientID = ClientID,
-                        Executed = (request != null),
-                        Metadata = (request != null) ? "OK" : "Bad",
+                        Executed = true,
+                        Metadata = "OK",
                         Timestamp = DateTime.UtcNow,
                     };
                     Console.WriteLine($"[Demo][msmqcmd] CommandQuery send response :{response}");
