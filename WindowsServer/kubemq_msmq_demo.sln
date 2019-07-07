@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kubme_msmq_worker", "kubemq
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "kubemq_msmq_worker_tester", "kubemq_msmq_worker_tester\kubemq_msmq_worker_tester.csproj", "{47196097-4568-43E1-A200-4ECC8FD5B60A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "msmq_receiver", "msmq_receiver\msmq_receiver.csproj", "{739977D5-FB93-4EBE-9A41-3D31C942F91D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "kubemq_msmq_receiver", "kubemq_msmq_receiver\kubemq_msmq_receiver.csproj", "{739977D5-FB93-4EBE-9A41-3D31C942F91D}"
 EndProject
 Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "website", "website\", "{44158A85-6F33-4A81-A521-921F1A93B9F1}"
 	ProjectSection(WebsiteProperties) = preProject
