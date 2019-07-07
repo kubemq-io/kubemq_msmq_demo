@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,10 +10,11 @@ using System.Text;
 using System.Timers;
 using System.Xml.Linq;
 
-namespace msmq_generator
+namespace kubemq_msmq_rates_generator
 {
     /// <summary>
-    /// Manager run the program main logic
+    /// Manager run the program main logic.
+    /// Contain the Random for all the rates classes.
     /// </summary>
     class Manager
     {
@@ -20,14 +23,19 @@ namespace msmq_generator
         private string ListenPath;
         private string SendPath;
         private static System.Timers.Timer timer;
-        public Manager(string pListenQueuePath, string pSendRateQueue)
+        private readonly IConfiguration _config;
+        private ILogger<Manager> _logger;
+        public Manager(IConfiguration configuration, ILogger<Manager> logger)
         {
+            _logger = logger;
+            _config = configuration;
             rnd = new Random();
-            ListenPath = pListenQueuePath;
-            SendPath = pSendRateQueue;
+
+            ListenPath = GetCommendQueueName();
+            SendPath = GetRateQueueName();
             StartListen();
             startSendingRates();
-            Console.WriteLine($"initialized Manger on path {ListenPath}");
+            _logger.LogInformation($"initialized Manger on listen path {ListenPath} , and send path {SendPath}");
 
         }
         /// <summary>
@@ -42,21 +50,21 @@ namespace msmq_generator
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to check if Queue {SendPath} exists on exception {ex}");
+                _logger.LogError($"Failed to check if Queue {SendPath} exists on exception {ex}");
                 throw ex;
             }
             if (!exist)
             {
-                Console.WriteLine($"Queue {SendPath} does not exists, creating new Queue");
+                _logger.LogDebug($"Queue {SendPath} does not exists, creating new Queue");
                 try
                 {
                     MessageQueue rateQueue = MessageQueue.Create(SendPath);
-                    Console.WriteLine($"Queue {SendPath} created");
+                    _logger.LogDebug($"Queue {SendPath} created");
 
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Failed to create Queue {SendPath} on exception {ex}");
+                    _logger.LogError($"Failed to create Queue {SendPath} on exception {ex}");
                     throw ex;
                 }
             }
@@ -70,7 +78,7 @@ namespace msmq_generator
                 {"Credit", new Rates("Credit",6) },
                 {"Vespene gas",new Rates("Vespene gas",7) }
             };
-            Console.WriteLine($"Starting to generate rates, will send them to {SendPath}");
+            _logger.LogInformation($"Starting to generate rates, will send them to {SendPath}");
             SetRateTimer();
         }
         /// <summary>
@@ -85,21 +93,21 @@ namespace msmq_generator
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to check if Queue {ListenPath} exists on exception {ex}");
+                _logger.LogError($"Failed to check if Queue {ListenPath} exists on exception {ex}");
                 throw ex;
             }
             if (!exist)
             {
-                Console.WriteLine($"Queue {ListenPath} does not exists, creating new Queue");
+                _logger.LogDebug($"Queue {ListenPath} does not exists, creating new Queue");
                 try
                 {
                     MessageQueue rateQueue = MessageQueue.Create(ListenPath);
-                    Console.WriteLine($"Queue {ListenPath} created");
+                    _logger.LogDebug($"Queue {ListenPath} created");
 
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Failed to create Queue {ListenPath} on exception {ex}");
+                    _logger.LogError($"Failed to create Queue {ListenPath} on exception {ex}");
                     throw ex;
                 }
             }
@@ -114,7 +122,7 @@ namespace msmq_generator
         /// </summary>
         private void MyReciveCompleted(object source, ReceiveCompletedEventArgs asyncResult)
         {
-            Console.WriteLine($"Received message to queue");
+            _logger.LogDebug($"Received message to queue");
             MessageQueue mq = (MessageQueue)source;
             asyncResult.Message.Formatter = new ActiveXMessageFormatter();
 
@@ -125,7 +133,7 @@ namespace msmq_generator
                 request = JsonConvert.DeserializeObject<RateRequest>(asyncResult.Message.Body.ToString());
                 if (rateCollection.ContainsKey(request.Name))
                 {
-                    Console.WriteLine($"Changing {request.Name} active to:{request.Active}");
+                    _logger.LogInformation($"Changing {request.Name} active to:{request.Active}");
                     switch (request.Active)
                     {
                         case true:
@@ -141,7 +149,7 @@ namespace msmq_generator
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to parse active/inactive request on {ex}");
+                _logger.LogError($"Failed to parse active/inactive request on {ex}");
             }
             mq.BeginReceive();
 
@@ -186,20 +194,25 @@ namespace msmq_generator
             try
             {
                 string strLabel = "";
-
-
                 System.Messaging.Message newMessage = new System.Messaging.Message();
-                newMessage.BodyStream = new MemoryStream(Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(ratesList)));
+                string rateList = JsonConvert.SerializeObject(ratesList);
+                newMessage.BodyStream = new MemoryStream(Encoding.ASCII.GetBytes(rateList));
                 newMessage.Label = strLabel;
                 MessageQueue queue = new MessageQueue(SendPath, QueueAccessMode.Send);
                 queue.Send(newMessage, MessageQueueTransactionType.None);
+                _logger.LogDebug($"saved rate {rateList}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to send rates to queue on ex {ex}");
+                _logger.LogError($"Failed to send rates to queue on ex {ex}");
             }
         }
 
+        /// <summary>
+        /// Read a stream input and return byte[]
+        /// </summary>
+        /// <param name="input">Receive System.IO.Stream</param>
+        /// <returns>Return the stream input byte[]</returns>
         public static byte[] ReadFully(Stream input)
         {
             byte[] buffer = new byte[16 * 1024];
@@ -213,6 +226,43 @@ namespace msmq_generator
                 return ms.ToArray();
             }
         }
+
+
+        #region configuration load-up
+        private string GetCommendQueueName()
+        {
+
+
+            string cmdQu = Convert.ToString(_config["CMDQueue"]);
+
+            _logger.LogDebug("'commend queue' was set to{0}", cmdQu.ToString());
+
+            if (string.IsNullOrEmpty(cmdQu))
+            {
+                _logger.LogError("Did not find cmdQu");
+            }
+
+
+            return cmdQu;
+        }
+
+        private string GetRateQueueName()
+        {
+
+            // get address from appsettings.json
+            string rateQu = Convert.ToString(_config["RateQueue"]);
+
+            _logger.LogDebug("'RateQueue' was set to{0}", rateQu.ToString());
+
+            if (string.IsNullOrEmpty(rateQu))
+            {
+                _logger.LogError("Did not find RateQueue");
+            }
+
+
+            return rateQu;
+        }
+        #endregion
     }
     /// <summary>
     /// Rate sending to the Client

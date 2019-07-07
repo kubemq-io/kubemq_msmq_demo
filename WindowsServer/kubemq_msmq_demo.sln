@@ -32,7 +32,7 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "website", "website\", "{441
 		SlnRelativePath = "website\"
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "msmq_generator", "msmq_generator(dotnet)\msmq_generator.csproj", "{88634F26-5C82-40DE-9724-D0FB8DEA7AD7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kubemq_msmq_rates_generator", "msmq_generator(dotnet)\kubemq_msmq_rates_generator.csproj", "{88634F26-5C82-40DE-9724-D0FB8DEA7AD7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

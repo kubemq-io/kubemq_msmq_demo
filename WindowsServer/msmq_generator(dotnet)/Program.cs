@@ -1,36 +1,31 @@
 ﻿using System;
-using System.IO;
-using System.Messaging;
+using System.Threading;
+using Microsoft.Extensions.DependencyInjection;
 
-
-namespace msmq_generator
+namespace kubemq_msmq_rates_generator
 {
     class Program
     {
-
+        private static readonly AutoResetEvent waitHandle = new AutoResetEvent(false);
         static void Main(string[] args)
         {
+            NLog.LogManager.GetCurrentClassLogger().Info("~~~~ Starting kubemqMSMQ-RateGenerator ~~~~");
 
-            // Will listen to msmq to remove/add an instrument by client request
-            // Will write logs 
+            var servicesProvider = Startup.Init();
 
-            Manager manager = new Manager(@".\private$\receiver", @".\private$\RAQueue");
-            Console.ReadLine();
 
-            //try
-            //{
-            //    queuerec = new MessageQueue(MSMQPath, QueueAccessMode.Receive);
-            //    //queue.SetPermissions("Everyone", MessageQueueAccessRights.FullControl, AccessControlEntryType.Allow);
-            //    //queue.Authenticate = false;
-            //    //queue.EncryptionRequired = EncryptionRequired.None;
-            //}
-            //catch (Exception ex)
-            //{
+            Manager manager = servicesProvider.GetRequiredService<Manager>();
+            Console.CancelKeyPress += (o, e) =>
+            {
+                Console.WriteLine("Exit");
 
-            //}
-  
-
+                // Allow the main thread to continue and exit...
+                waitHandle.Set();
+            };
+            //wait
+            waitHandle.WaitOne();
         }
 
     }
+
 }
