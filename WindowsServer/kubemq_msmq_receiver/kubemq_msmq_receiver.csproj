@@ -6,11 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="KubeMQ.MSMQ.SDK" Version="1.0.1" />
     <PackageReference Include="KubeMQ.SDK.csharp" Version="1.0.4" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\kubemq_msmq_sdk(dotnetstandard)\kubemq_msmq_sdk.csproj" />
   </ItemGroup>
 
 </Project>

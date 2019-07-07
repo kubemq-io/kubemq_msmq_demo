@@ -56,6 +56,10 @@ namespace msmq_receiver
             Console.WriteLine($"[Demo] init KubeMQ MessageQueue CMDMQs:{CMDMQ}");
             MessageQueue sendMQ =new MessageQueue(CMDMQ);
 
+
+            System.Threading.CancellationTokenSource source = new System.Threading.CancellationTokenSource();
+            System.Threading.CancellationToken token = source.Token ;
+
             //start a task for dequeue messages from MSMSQ using KubeMQ MSMQ SDK
             //DequeueAndEventPub task implementing KubeMQ.MSMQ.SDK will request a Dequeue from KubeMQ MSMQ Worker publish the message to persistent KubeMQ channel.
             Task DequeueAndEventPub = Task.Run(() =>
@@ -111,20 +115,20 @@ namespace msmq_receiver
                 });
 
                 receiveMQ.BeginReceive();
-            });
+            }, token);
 
 
 
 
             //start a task for enqueue command messages to MSMSQ using KubeMQ MSMQ SDK
-            Task CommandHanleAndEequeue = Task.Run(() =>
+            Task CommandHanleAndEnqueue = Task.Run(() =>
             {
                 /// Init a new CommandQuery subscriber on the KubeMQ to receive commands
              
 
                 KubeMQ.SDK.csharp.CommandQuery.Responder responder = new KubeMQ.SDK.csharp.CommandQuery.Responder();
 
-                Console.WriteLine($"[Demo][CommandHanleAndEequeue] init KubeMQ CommandQuery subscriber :{CMDChannel}");
+                Console.WriteLine($"[Demo][CommandHanleAndEnqueue] init KubeMQ CommandQuery subscriber :{CMDChannel}");
 
                 responder.SubscribeToRequests(new KubeMQ.SDK.csharp.Subscription.SubscribeRequest()
                 {
@@ -134,7 +138,7 @@ namespace msmq_receiver
 
                 }, (KubeMQ.SDK.csharp.CommandQuery.RequestReceive request) =>
                 {
-                    Console.WriteLine($"[Demo][CommandHanleAndEequeue] CommandQuery RequestReceive :{request}");
+                    Console.WriteLine($"[Demo][CommandHanleAndEnqueue] CommandQuery RequestReceive :{request}");
                     KubeMQ.SDK.csharp.CommandQuery.Response response;
           
                     string strMsg = string.Empty;
@@ -148,7 +152,7 @@ namespace msmq_receiver
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"[Demo][CommandHanleAndEequeue] Error CommandQuery send response :{ex.Message}");
+                        Console.WriteLine($"[Demo][CommandHanleAndEnqueue] Error CommandQuery send response :{ex.Message}");
                         response = new KubeMQ.SDK.csharp.CommandQuery.Response(request)
                         {
                             Body = Encoding.UTF8.GetBytes(ex.Message),
@@ -158,7 +162,7 @@ namespace msmq_receiver
                             Timestamp = DateTime.UtcNow
 
                         };
-                        Console.WriteLine($"[Demo][CommandHanleAndEequeue] CommandQuery send response :{response}");
+                        Console.WriteLine($"[Demo][CommandHanleAndEnqueue] CommandQuery send response :{response}");
                         return response;
                     }
 
@@ -171,11 +175,11 @@ namespace msmq_receiver
                         Metadata = "OK",
                         Timestamp = DateTime.UtcNow,
                     };
-                    Console.WriteLine($"[Demo][CommandHanleAndEequeue] CommandQuery send response :{response}");
+                    Console.WriteLine($"[Demo][CommandHanleAndEnqueue] CommandQuery send response :{response}");
                     return response;
                 });
 
-            });
+            }, token);
             Console.WriteLine("[Demo] press Ctrl+c to stop");
 
             System.Threading.AutoResetEvent waitHandle = new System.Threading.AutoResetEvent(false);
@@ -188,6 +192,7 @@ namespace msmq_receiver
             };
 
             waitHandle.WaitOne();
+            source.Cancel();
 
         }
     }
