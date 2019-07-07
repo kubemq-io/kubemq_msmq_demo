@@ -185,15 +185,14 @@ namespace msmq_receiver
             System.Threading.AutoResetEvent waitHandle = new System.Threading.AutoResetEvent(false);
             Console.CancelKeyPress += (object sender, ConsoleCancelEventArgs e) =>
             {
-
+                Console.WriteLine($"[Demo] finish Demo");
+                source.Cancel();
                 e.Cancel = true;
                 waitHandle.Set();
-
             };
 
             waitHandle.WaitOne();
-            source.Cancel();
-
+        
         }
     }
 }
