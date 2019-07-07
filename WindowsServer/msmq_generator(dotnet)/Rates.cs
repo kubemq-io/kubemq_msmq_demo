@@ -38,8 +38,8 @@ namespace msmq_generator
 
         private void OnTimedEvent(object sender, ElapsedEventArgs e)
         {
-            buy = buy * GetDoubleRandomNumber(0.8, 1.2);
-            sell= sell * GetDoubleRandomNumber(0.8, 1.2);
+            buy = buy * GetDoubleRandomNumber(0.9, 1.1);
+            sell= sell * GetDoubleRandomNumber(0.9, 1.1);
         }
 
         private double GetDoubleRandomNumber(double minimum, double maximum)
@@ -51,7 +51,7 @@ namespace msmq_generator
         private int GetRateInitalValue()
         {
             Random random = new Random();
-            return random.Next(450, 550);
+            return random.Next(4500, 5500);
         }
     }
 }
