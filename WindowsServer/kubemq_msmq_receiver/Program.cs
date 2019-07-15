@@ -54,32 +54,69 @@ namespace msmq_receiver
             Console.WriteLine($"[Demo] init KubeMQ MessageQueue RateMQ:{RateMQ}");
             MessageQueue receiveMQ = new MessageQueue(RateMQ);
             Console.WriteLine($"[Demo] init KubeMQ MessageQueue CMDMQs:{CMDMQ}");
-            MessageQueue sendMQ =new MessageQueue(CMDMQ);
+            MessageQueue sendMQ = new MessageQueue(CMDMQ);
 
 
             System.Threading.CancellationTokenSource source = new System.Threading.CancellationTokenSource();
-            System.Threading.CancellationToken token = source.Token ;
+            System.Threading.CancellationToken token = source.Token;
+
+
 
             //start a task for dequeue messages from MSMSQ using KubeMQ MSMQ SDK
             //DequeueAndEventPub task implementing KubeMQ.MSMQ.SDK will request a Dequeue from KubeMQ MSMQ Worker publish the message to persistent KubeMQ channel.
-            Task DequeueAndEventPub = Task.Run(() =>
+
+
+
+
+            /// Init a new sender channel on the KubeMQ to publish received rates
+
+            KubeMQ.SDK.csharp.Events.Channel channel = new KubeMQ.SDK.csharp.Events.Channel(new KubeMQ.SDK.csharp.Events.ChannelParameters
             {
-                /// Init a new sender channel on the KubeMQ to publish received rates
-          
+                ChannelName = PubChannel,
+                ClientID = ClientID,
+                Store = true
+            });
 
-                KubeMQ.SDK.csharp.Events.Channel channel = new KubeMQ.SDK.csharp.Events.Channel(new KubeMQ.SDK.csharp.Events.ChannelParameters
-                {
-                    ChannelName = PubChannel,                  
-                    ClientID = ClientID,
-                    Store = true
-                });
-                Console.WriteLine($"[Demo][DequeueAndEventPub] init KubeMQ publish persistence channel  PubChannel:{PubChannel}");
+            Console.WriteLine($"[Demo][DequeueAndEventPub] init KubeMQ publish persistence channel  PubChannel:{PubChannel}");
 
+
+            Task.Run((Func<Task>)(async () =>
+            {
+                await DequeueAndEventPub(receiveMQ, channel);
+            }), token);
+
+
+
+            Task.Run((Func<Task>)(async () =>
+            {
+                await CommandHanleAndEnqueue(sendMQ);
+            }), token);
+
+
+            Console.WriteLine("[Demo] press Ctrl+c to stop");
+
+            System.Threading.AutoResetEvent waitHandle = new System.Threading.AutoResetEvent(false);
+            Console.CancelKeyPress += (object sender, ConsoleCancelEventArgs e) =>
+            {
+                Console.WriteLine($"[Demo] finish Demo");
+                source.Cancel();
+                e.Cancel = true;
+                waitHandle.Set();
+            };
+
+            waitHandle.WaitOne();
+        
+        }
+
+        static async Task DequeueAndEventPub(MessageQueue receiveMQ, KubeMQ.SDK.csharp.Events.Channel channel)
+        {
+            try
+            {
                 /// KubeMQ msmq message handler
                 receiveMQ.ReceiveCompleted += new ReceiveCompletedEventHandler((sender, eventArgs) =>
-                {                    
+                {
                     eventArgs.Message.Formatter = new BinaryMessageFormatter();
-                   
+
                     System.IO.Stream stream = new System.IO.MemoryStream(eventArgs.Message.BodyStream);
                     StreamReader reader = new StreamReader(stream);
                     string msgBody = null;
@@ -88,9 +125,9 @@ namespace msmq_receiver
                         msgBody = reader.ReadToEnd();
                         Console.WriteLine($"[Demo][DequeueAndEventPub] Msg received from RateMQ {sender}:{msgBody}");
                     }
-                    catch (Exception ex )
+                    catch (Exception ex)
                     {
-                        Console.WriteLine($"[Demo][DequeueAndEventPub] Error parse msg from RateMQ {sender}:{ex.Message}");                        
+                        Console.WriteLine($"[Demo][DequeueAndEventPub] Error parse msg from RateMQ {sender}:{ex.Message}");
                     }
 
                     if (msgBody != null)
@@ -110,89 +147,78 @@ namespace msmq_receiver
                             Console.WriteLine($"[Demo][DequeueAndEventPub] Error parse msg from RateMQ {sender}:{ex.Message}");
                         }
                     }
-                   
+
                     receiveMQ.BeginReceive();
                 });
-
                 receiveMQ.BeginReceive();
-            }, token);
-
-
-
-
-            //start a task for enqueue command messages to MSMSQ using KubeMQ MSMQ SDK
-            Task CommandHanleAndEnqueue = Task.Run(() =>
+            }
+            catch (Exception ex)
             {
-                /// Init a new CommandQuery subscriber on the KubeMQ to receive commands
-             
+                Console.WriteLine($"[Demo][DequeueAndEventPub] Error register event error:{ex.Message}, please check the kubme_msmq_worker is listening on KUBEMQSCHANNEL:{Environment.GetEnvironmentVariable("KUBEMQSCHANNEL")}");
+                await DequeueAndEventPub(receiveMQ, channel);
+            }
 
-                KubeMQ.SDK.csharp.CommandQuery.Responder responder = new KubeMQ.SDK.csharp.CommandQuery.Responder();
+        }
 
-                Console.WriteLine($"[Demo][CommandHanleAndEnqueue] init KubeMQ CommandQuery subscriber :{CMDChannel}");
+        static async Task CommandHanleAndEnqueue(MessageQueue sendMQ)
+        {
+            /// Init a new CommandQuery subscriber on the KubeMQ to receive commands
 
-                responder.SubscribeToRequests(new KubeMQ.SDK.csharp.Subscription.SubscribeRequest()
+
+            KubeMQ.SDK.csharp.CommandQuery.Responder responder = new KubeMQ.SDK.csharp.CommandQuery.Responder();
+
+            Console.WriteLine($"[Demo][CommandHanleAndEnqueue] init KubeMQ CommandQuery subscriber :{CMDChannel}");
+
+            responder.SubscribeToRequests(new KubeMQ.SDK.csharp.Subscription.SubscribeRequest()
+            {
+                SubscribeType = KubeMQ.SDK.csharp.Subscription.SubscribeType.Commands,
+                Channel = CMDChannel,
+                ClientID = ClientID
+
+            }, (KubeMQ.SDK.csharp.CommandQuery.RequestReceive request) =>
+            {
+                Console.WriteLine($"[Demo][CommandHanleAndEnqueue] CommandQuery RequestReceive :{request}");
+                KubeMQ.SDK.csharp.CommandQuery.Response response;
+
+                string strMsg = string.Empty;
+                object body = Encoding.UTF8.GetString(request.Body);
+                try
                 {
-                    SubscribeType = KubeMQ.SDK.csharp.Subscription.SubscribeType.Commands,
-                    Channel = CMDChannel,
-                    ClientID = ClientID
-
-                }, (KubeMQ.SDK.csharp.CommandQuery.RequestReceive request) =>
+                    sendMQ.Send(new Message
+                    {
+                        Body = body
+                    });
+                }
+                catch (Exception ex)
                 {
-                    Console.WriteLine($"[Demo][CommandHanleAndEnqueue] CommandQuery RequestReceive :{request}");
-                    KubeMQ.SDK.csharp.CommandQuery.Response response;
-          
-                    string strMsg = string.Empty;
-                    object body = Encoding.UTF8.GetString(request.Body);
-                    try
-                    {
-                        sendMQ.Send(new Message
-                        {
-                            Body = body
-                        });
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"[Demo][CommandHanleAndEnqueue] Error CommandQuery send response :{ex.Message}");
-                        response = new KubeMQ.SDK.csharp.CommandQuery.Response(request)
-                        {
-                            Body = Encoding.UTF8.GetBytes(ex.Message),
-                            Error = $"Received error from KubeMQ.MSMQ {ex.Message}",
-                            ClientID = ClientID,
-                            Metadata = "Bad",
-                            Timestamp = DateTime.UtcNow
-
-                        };
-                        Console.WriteLine($"[Demo][CommandHanleAndEnqueue] CommandQuery send response :{response}");
-                        return response;
-                    }
-
+                    Console.WriteLine($"[Demo][CommandHanleAndEnqueue] Error CommandQuery send response :{ex.Message}");
                     response = new KubeMQ.SDK.csharp.CommandQuery.Response(request)
                     {
-                        Body = Encoding.UTF8.GetBytes("o.k"),
-                        Error = "None",
+                        Body = Encoding.UTF8.GetBytes(ex.Message),
+                        Error = $"Received error from KubeMQ.MSMQ {ex.Message}",
                         ClientID = ClientID,
-                        Executed = true,
-                        Metadata = "OK",
-                        Timestamp = DateTime.UtcNow,
+                        Metadata = "Bad",
+                        Timestamp = DateTime.UtcNow
+
                     };
                     Console.WriteLine($"[Demo][CommandHanleAndEnqueue] CommandQuery send response :{response}");
                     return response;
-                });
+                }
 
-            }, token);
-            Console.WriteLine("[Demo] press Ctrl+c to stop");
-
-            System.Threading.AutoResetEvent waitHandle = new System.Threading.AutoResetEvent(false);
-            Console.CancelKeyPress += (object sender, ConsoleCancelEventArgs e) =>
-            {
-                Console.WriteLine($"[Demo] finish Demo");
-                source.Cancel();
-                e.Cancel = true;
-                waitHandle.Set();
-            };
-
-            waitHandle.WaitOne();
-        
+                response = new KubeMQ.SDK.csharp.CommandQuery.Response(request)
+                {
+                    Body = Encoding.UTF8.GetBytes("o.k"),
+                    Error = "None",
+                    ClientID = ClientID,
+                    Executed = true,
+                    Metadata = "OK",
+                    Timestamp = DateTime.UtcNow,
+                };
+                Console.WriteLine($"[Demo][CommandHanleAndEnqueue] CommandQuery send response :{response}");
+                return response;
+            });
         }
+
+
     }
 }
