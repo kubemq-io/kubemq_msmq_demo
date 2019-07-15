@@ -22,6 +22,7 @@ namespace kubemq_msmq_rates_generator
         private Dictionary<string,Rates> rateCollection;
         private string ListenPath;
         private string SendPath;
+        private int RateInterval;
         private static System.Timers.Timer timer;
         private readonly IConfiguration _config;
         private ILogger<Manager> _logger;
@@ -33,6 +34,7 @@ namespace kubemq_msmq_rates_generator
 
             ListenPath = GetCommendQueueName();
             SendPath = GetRateQueueName();
+            RateInterval = GetRateInterval();
             StartListen();
             startSendingRates();
             _logger.LogInformation($"initialized Manger on listen path {ListenPath} , and send path {SendPath}");
@@ -164,7 +166,7 @@ namespace kubemq_msmq_rates_generator
         private void SetRateTimer()
         {
 
-            timer = new System.Timers.Timer(1000);
+            timer = new System.Timers.Timer(RateInterval);
 
             timer.Elapsed += OnRateSend;
             timer.AutoReset = true;
@@ -261,6 +263,25 @@ namespace kubemq_msmq_rates_generator
 
 
             return rateQu;
+        }
+
+        private int GetRateInterval()
+        {
+
+            // get interval from appsettings.json
+            string rateQu = Convert.ToString(_config["RateInterval"]);
+            int parsedInterval = 0;
+            int.TryParse(rateQu, out parsedInterval);
+
+            if (parsedInterval<0)
+            {
+                _logger.LogError("failed to set 'RateInterval' to value of {0}, setting to defualt of 3000", rateQu.ToString());
+                parsedInterval = 3000;
+            }
+            _logger.LogDebug("'RateInterval' was set to{0}", rateQu.ToString());
+
+
+            return parsedInterval;
         }
         #endregion
     }
