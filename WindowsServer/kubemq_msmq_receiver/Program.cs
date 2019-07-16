@@ -65,12 +65,6 @@ namespace msmq_receiver
 
 
 
-            //start a task for dequeue messages from MSMSQ using KubeMQ MSMQ SDK
-            //DequeueAndEventPub task implementing KubeMQ.MSMQ.SDK will request a Dequeue from KubeMQ MSMQ Worker publish the message to persistent KubeMQ channel.
-
-
-
-
             /// Init a new sender channel on the KubeMQ to publish received rates
 
             KubeMQ.SDK.csharp.Events.Channel channel = new KubeMQ.SDK.csharp.Events.Channel(new KubeMQ.SDK.csharp.Events.ChannelParameters
@@ -82,14 +76,17 @@ namespace msmq_receiver
 
             Console.WriteLine($"[Demo][DequeueAndEventPub] init KubeMQ publish persistence channel  PubChannel:{PubChannel}");
 
-
+            //start a task for dequeue messages from MSMSQ using KubeMQ MSMQ SDK
+           
             Task.Run((Func<Task>)(async () =>
-            {
+            { 
+                //DequeueAndEventPub task implementing KubeMQ.MSMQ.SDK will request a Dequeue from KubeMQ MSMQ Worker publish the message to persistent KubeMQ channel.
+
                 await DequeueAndEventPub(receiveMQ, channel);
             }), token);
 
 
-
+            //start a task for enqueue MSMSQ messages using KubeMQ MSMQ SDK
             Task.Run((Func<Task>)(async () =>
             {
                 await CommandHanleAndEnqueue(sendMQ);
