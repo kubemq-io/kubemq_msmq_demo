@@ -35,6 +35,9 @@ namespace msmq_receiver
         private static string CMDMQ = Environment.GetEnvironmentVariable("CMDMQ") ?? @".\private$\receiver";
 
 
+
+
+
         static void Main(string[] args)
         {
 

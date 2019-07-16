@@ -12,6 +12,10 @@ namespace KubeMQ.MSMQSDK
         public string Path { get; set; }
         public string Label { get; set; }
         public string ChannelToReturn { get; set; }
+        /// <summary>
+        /// Only relevant to json request
+        /// </summary>
+        public string FormmaterName { get; set; }
         public MSMQMeta()
         {
 
@@ -44,8 +48,8 @@ namespace KubeMQ.MSMQSDK
         /// In:String
         /// Out:MSMQMeta
         /// </summary>
-        /// <param name="MSMQMeta"></param>
-        /// <returns></returns>
+        /// <param name="MSMQMeta">string to create the MSMQMeta</param>
+        /// <returns>MSMQMeta contain the queue general data </returns>
         public MSMQMeta FromString(string MSMQMeta)
         {
             MSMQMeta mSMQMeta = new MSMQMeta();
@@ -70,6 +74,9 @@ namespace KubeMQ.MSMQSDK
                         mSMQMeta.ChannelToReturn = item.Replace("ChannelToReturn:", "");
                         break;
                     default:
+                        break;
+                    case "Formmater":
+                        mSMQMeta.FormmaterName= item.Replace("Formmater:", "");
                         break;
                 }
             }

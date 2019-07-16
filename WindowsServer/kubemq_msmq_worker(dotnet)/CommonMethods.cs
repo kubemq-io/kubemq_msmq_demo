@@ -15,8 +15,6 @@ namespace MSMQWorkerConsole
 {
     public class CommonMethods
     {
-        //private List<System.Messaging.MessageQueue> OpenPeekQueues;
-        //private List<System.Messaging.MessageQueue> OpenRecieveQueues;
         private ConcurrentDictionary<string, System.Messaging.MessageQueue> OpenPeekQueues;
         private ConcurrentDictionary<string, System.Messaging.MessageQueue> OpenRecieveQueues;
         private ILogger<CommonMethods> _logger;
@@ -41,8 +39,8 @@ namespace MSMQWorkerConsole
         /// <summary>
         /// Check if MSMQchannel exist
         /// </summary>
-        /// <param name="path"></param>
-        /// <returns></returns>
+        /// <param name="path">the queue name.</param>
+        /// <returns>ResultModel:show the status of the request.</returns>
         internal ResultModel Exists(string path)
         {
             ResultModel resultModel = new ResultModel();
@@ -68,10 +66,10 @@ namespace MSMQWorkerConsole
             return resultModel;
         }
         /// <summary>
-        /// Create Queue with path name
+        /// Create Queue with path name.
         /// </summary>
-        /// <param name="path"></param>
-        /// <returns></returns>
+        /// <param name="path">the queue name.</param>
+        /// <returns>ResultModel:show the status of the request.</returns>
         internal ResultModel CreateQueue(string path)
         {
             ResultModel resultModel = new ResultModel();
@@ -100,10 +98,10 @@ namespace MSMQWorkerConsole
 
 
         /// <summary>
-        /// Purge Queue With Path Name
+        /// Purge Queue With Path Name.
         /// </summary>
-        /// <param name="path"></param>
-        /// <returns></returns>
+        /// <param name="path">the queue name.</param>
+        /// <returns>ResultModel:show the status of the request.</returns>
         internal ResultModel PurgeQueue(string path)
         {
             ResultModel resultModel = new ResultModel();
@@ -131,10 +129,10 @@ namespace MSMQWorkerConsole
         }
 
         /// <summary>
-        /// Delete Queue With Path Name
+        /// Delete Queue With Path Name.
         /// </summary>
-        /// <param name="path"></param>
-        /// <returns></returns>
+        /// <param name="path">the queue name.</param>
+        /// <returns>ResultModel:show the status of the request.</returns>
         internal ResultModel DeleteQueue(string path)
         {
             ResultModel resultModel = new ResultModel();
@@ -154,11 +152,11 @@ namespace MSMQWorkerConsole
         }
 
         /// <summary>
-        /// Send message to existing queue
+        /// Send message to existing queue.
         /// </summary>
-        /// <param name="meta"></param>
-        /// <param name="message"></param>
-        /// <returns></returns>
+        /// <param name="meta">contain the queue general data for exemple:queue path , queue name.</param>
+        /// <param name="message">Message to insert to the queue.</param>
+        /// <returns>ResultModel:show the status of the request.</returns>
         internal ResultModel SendToQueue(MSMQMeta meta, KubeMQ.MSMQSDK.Messages.Message message)
         {
             ResultModel resultModel = new ResultModel();
@@ -167,7 +165,6 @@ namespace MSMQWorkerConsole
                 System.Messaging.MessageQueue myQueue = new System.Messaging.MessageQueue(meta.Path);
                 myQueue.Formatter = new ActiveXMessageFormatter();
                 System.Messaging.Message MyMessage = MessageConvert.ConvertToSystemMessage(message);
-                MyMessage.Formatter = new ActiveXMessageFormatter();
                 myQueue.Send(MyMessage);
                 _logger.LogDebug(string.Format("Added message to Queue:{0}", meta.Path));
                 resultModel.Result = (int)ResultsEnum.AddedToQueue;
@@ -189,10 +186,10 @@ namespace MSMQWorkerConsole
         }
 
         /// <summary>
-        /// Peek and return the first message in the queue
+        /// Peek and return the first message in the queue.
         /// </summary>
-        /// <param name="path"></param>
-        /// <returns></returns>
+        /// <param name="path">the queue name.</param>
+        /// <returns>ResultModel:show the status of the request.</returns>
         internal ResultModel PeekQueue(string path)
         {
             ResultModel resultModel = new ResultModel();
@@ -213,12 +210,46 @@ namespace MSMQWorkerConsole
             return resultModel;
         }
 
+        /// <summary>
+        /// Send message to existing queue from json format.
+        /// </summary>
+        /// <param name="meta">contain the queue general data for exemple:queue path , queue name.</param>
+        /// <param name="body">the body as string to insert to the queue</param>
+        /// <returns>ResultModel:show the status of the request.</returns>
+        internal ResultModel SendJsonRequestToQueue(MSMQMeta meta, string body)
+        {
+            ResultModel resultModel = new ResultModel();
+            try
+            {
+                System.Messaging.MessageQueue myQueue = new System.Messaging.MessageQueue(meta.Path);
+                myQueue.Formatter = new ActiveXMessageFormatter();
+                System.Messaging.Message MyMessage = MessageConvert.ConvertStringToSystemMessage(body, meta.FormmaterName, meta.Label);
+                myQueue.Send(MyMessage);
+                _logger.LogDebug(string.Format("Added json message to Queue:{0}", meta.Path));
+                resultModel.Result = (int)ResultsEnum.AddedToQueue;
+            }
+            catch (System.Messaging.MessageQueueException ex)
+            {
+                KubeMQ.MSMQSDK.Results.MessageQueueException messageEx = new KubeMQ.MSMQSDK.Results.MessageQueueException(ex);
+                _logger.LogCritical("Failed Sending json Message to queue {0} on exception {1}", meta.Path, ex.Message);
+                resultModel.Result = (int)ResultsEnum.Error;
+                resultModel.exception = messageEx;
+            }
+            catch (Exception ex)
+            {
+                resultModel.Result = (int)ResultsEnum.Error;
+                _logger.LogCritical("Failed Sending json Message to queue {0} on exception {1}", meta.Path, ex.Message);
+                resultModel.exception = ex;
+            }
+            return resultModel;
+        }
+
         #region Events
         /// <summary>
         /// Frees all resources allocated by the System.Messaging.MessageQueue. regarding a specific queue
         /// </summary>
-        /// <param name="path"></param>
-        /// <returns></returns>
+        /// <param name="path">the queue name.</param>
+        /// <returns>ResultModel:show the status of the request.</returns>
         internal ResultModel UnregisterPeek(string path)
         {
             ResultModel resultModel = new ResultModel();
@@ -247,6 +278,11 @@ namespace MSMQWorkerConsole
             return resultModel;
         }
 
+        /// <summary>
+        /// UnregisterReceive , unregister from queue.
+        /// </summary>
+        /// <param name="path">the queue name.</param>
+        /// <returns>ResultModel:show the status of the request.</returns>
         internal ResultModel UnregisterReceive(string path)
         {
             ResultModel resultModel = new ResultModel();
@@ -278,8 +314,8 @@ namespace MSMQWorkerConsole
         /// Initiates an asynchronous peek operation that has no time-out. The operation
         ///    is not complete until a message becomes available in the queue.
         /// </summary>
-        /// <param name="path"></param>
-        /// <returns></returns>
+        /// <param name="path">the queue name.</param>
+        /// <returns>ResultModel:show the status of the request.</returns>
         internal ResultModel BeginPeek(string path)
         {
             ResultModel resultModel = new ResultModel();
@@ -384,7 +420,7 @@ namespace MSMQWorkerConsole
         /// </summary>
         /// <param name="path"></param>
         /// <param name="ChannelToReturnTo"></param>
-        /// <returns></returns>
+        /// <returns>ResultModel:show the status of the request.</returns>
         internal ResultModel PeekEvent(string path, string ChannelToReturnTo)
         {
             System.Messaging.MessageQueue MyQueue = new System.Messaging.MessageQueue(path);
@@ -398,11 +434,7 @@ namespace MSMQWorkerConsole
         /// <summary>
         /// Peek Event Handler
         /// </summary>
-        /// <param name="source"></param>
-        /// <param name="asyncResult"></param>
-        /// <param name="ChannelToReturnTo"></param>
-        /// <param name="channelPeeked"></param>
-        private async Task MyPeekCompleted(Object source,
+        private async Task MyPeekCompleted(object source,
                     PeekCompletedEventArgs asyncResult, string ChannelToReturnTo,string channelPeeked)
         {
             ResultModel resultModel = new ResultModel();

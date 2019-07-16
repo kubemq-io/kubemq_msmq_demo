@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using System;
 using KubeMQ.MSMQSDK;
 using KubeMQ.MSMQSDK.Results;
+using KubeMQ.MSMQSDK.Messages;
 
 namespace MSMQWorkerConsole
 {
@@ -100,6 +101,10 @@ namespace MSMQWorkerConsole
                         break;
                     case "BeginReceive":
                         result = common.BeginRecieve(meta.Path);
+                        break;
+                    case "SendJson":
+                        string str = System.Text.Encoding.Default.GetString(request.Body);
+                        result = common.SendJsonRequestToQueue(meta, str);
                         break;
                 }
                 if (result.exception != null)

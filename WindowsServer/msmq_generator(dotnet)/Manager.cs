@@ -181,17 +181,22 @@ namespace kubemq_msmq_rates_generator
             List<SenderMessageBody> ratesList = new List<SenderMessageBody>();
             foreach (var rate in rateCollection)
             {
+                SenderMessageBody message = new SenderMessageBody()
+                {
+                    ID = rate.Value.id,
+                    Name = rate.Value.rateName,
+                };
                 if (rate.Value.isActive)
                 {
-                    SenderMessageBody message = new SenderMessageBody()
-                    {
-                        ID=rate.Value.id,
-                        Name = rate.Value.rateName,
-                        Ask = rate.Value.buy.ToString(),
-                        Bid = rate.Value.sell.ToString()
-                    };
-                    ratesList.Add(message);
+                    message.Ask = rate.Value.buy.ToString();
+                    message.Bid = rate.Value.sell.ToString();
                 }
+                else
+                {
+                    message.Ask = null;
+                    message.Bid = null;
+                }
+                ratesList.Add(message);
             }
             try
             {
