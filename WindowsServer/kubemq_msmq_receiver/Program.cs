@@ -181,12 +181,14 @@ namespace msmq_receiver
                 KubeMQ.SDK.csharp.CommandQuery.Response response;
 
                 string strMsg = string.Empty;
-                object body = Encoding.UTF8.GetString(request.Body);
+                object body = System.Text.Encoding.Default.GetString(request.Body);
                 try
                 {
                     sendMQ.Send(new Message
                     {
-                        Body = body
+                        Body = body,
+                        Formatter = new ActiveXMessageFormatter()
+                        
                     });
                 }
                 catch (Exception ex)
