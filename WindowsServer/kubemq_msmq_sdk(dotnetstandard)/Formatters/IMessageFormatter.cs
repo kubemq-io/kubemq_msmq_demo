@@ -32,7 +32,7 @@ namespace KubeMQ.MSMQSDK.Messages
             throw new NotImplementedException();
         }
     }
-
+    [Serializable]
     public class ActiveXMessageFormatter : MicrosoftFormatter
     {
         public ActiveXMessageFormatter()
