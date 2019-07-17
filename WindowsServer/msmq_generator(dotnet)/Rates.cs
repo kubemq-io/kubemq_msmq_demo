@@ -32,7 +32,7 @@ namespace kubemq_msmq_rates_generator
         /// </summary>
         private void SetRateChangeTimer()
         {
-            rateChanger = new System.Timers.Timer(670);
+            rateChanger = new System.Timers.Timer(Manager.rnd.Next(550,880));
 
             rateChanger.Elapsed += OnRateChangeEvent;
             rateChanger.AutoReset = true;
@@ -44,8 +44,8 @@ namespace kubemq_msmq_rates_generator
         /// </summary>
         private void OnRateChangeEvent(object sender, ElapsedEventArgs e)
         {
-            buy =  GetDoubleRandomNumber(0.995, 1.005, buy);
-            sell=  GetDoubleRandomNumber(0.995, 1.005, sell);
+            buy =  GetDoubleRandomNumber(buy-0.05, buy + 0.05, buy);
+            sell=  GetDoubleRandomNumber(sell-0.05, sell+ 0.05, sell);
         }
 
         /// <summary>
@@ -54,18 +54,19 @@ namespace kubemq_msmq_rates_generator
         /// <param name="minimum">Minimum Change</param>
         /// <param name="maximum">Maximum Change</param>
         /// <param name="currentValue">The current Value</param>
-        /// <returns>A relative value that is not under 2000 and does not exceed 10000</returns>
+        /// <returns>A relative value that is not under 1 and does not exceed 2</returns>
         private double GetDoubleRandomNumber(double minimum, double maximum,double currentValue)
         {
-            double randDouble= Manager.rnd.NextDouble() * (maximum - minimum) + minimum;
-            currentValue = currentValue * randDouble;
-            if (currentValue < 2000)
+            var next = Manager.rnd.NextDouble();
+
+            currentValue= Manager.rnd.NextDouble() * Math.Abs(maximum - minimum) +minimum;
+            if (currentValue < 1)
             {
-                currentValue = 2200;
+                currentValue = Manager.rnd.NextDouble() * Math.Abs(maximum - (minimum)) + minimum + 0.05;
             }
-            else if (currentValue > 10000)
+            else if (currentValue > 2)
             {
-                currentValue = 9800;
+                currentValue = Manager.rnd.NextDouble() * Math.Abs((maximum- 0.05) - minimum) + minimum;
             }
             return currentValue;
         }
@@ -73,11 +74,10 @@ namespace kubemq_msmq_rates_generator
         /// <summary>
         /// Get Initial value for rate.
         /// </summary>
-        /// <returns> int between 4500-7800</returns>
+        /// <returns> int between 1-2</returns>
         private int GetRateInitialValue()
         {
-            Random random = new Random();
-            return random.Next(4500, 7800);
+            return Manager.rnd.Next(1, 2);
         }
     }
 }
