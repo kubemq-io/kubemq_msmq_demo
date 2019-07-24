@@ -72,13 +72,13 @@ namespace kubemq_msmq_rates_generator
             }
             rateCollection = new Dictionary<string, Rates>
             {
-                {"Golden Coin", new Rates("Golden Coin",1) },
-                {"GIL",new Rates("GIL",2) },
-                {"Zenny", new Rates("Zenny",3) },
-                {"Dollar", new Rates("Dollar",4) },
-                {"Red Orbs", new Rates("Red Orbs",5) },
-                {"Credit", new Rates("Credit",6) },
-                {"Vespene gas",new Rates("Vespene gas",7) }
+                {"EURUSD", new Rates("EURUSD",1) },
+                {"AUDUSD",new Rates("AUDUSD",2) },
+                {"USDJPY", new Rates("USDJPY",3) },
+                {"CHFJPY", new Rates("CHFJPY",4) },
+                {"NZDUSD", new Rates("NZDUSD",5) },
+                {"GBPJPY", new Rates("GBPJPY",6) },
+                {"USDILS",new Rates("USDILS",7) }
             };
             _logger.LogInformation($"Starting to generate rates, will send them to {SendPath}");
             SetRateTimer();
