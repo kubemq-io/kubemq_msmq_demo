@@ -10,7 +10,7 @@
     <Description>.NET Client for KubeMQ.MSMQ</Description>
     <AssemblyVersion>1.0.2.0</AssemblyVersion>
     <FileVersion>1.0.2.0</FileVersion>
-    <Version>1.0.2</Version>
+    <Version>1.0.2-alpha</Version>
     <PackageId>KubeMQ.MSMQ.SDK</PackageId>
     <Product>KubeMQ.MSMQ.SDK</Product>
   </PropertyGroup>
