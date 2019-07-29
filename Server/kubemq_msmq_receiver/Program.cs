@@ -155,7 +155,7 @@ namespace msmq_receiver
             catch (Exception ex)
             {
                 Console.WriteLine($"[Demo][DequeueAndEventPub] Error register event error:{ex.Message}, please check the kubme_msmq_worker is listening on KUBEMQSCHANNEL:{Environment.GetEnvironmentVariable("KUBEMQSCHANNEL")}");
-                await DequeueAndEventPub(receiveMQ, channel);
+            //    await DequeueAndEventPub(receiveMQ, channel);
             }
 
         }
