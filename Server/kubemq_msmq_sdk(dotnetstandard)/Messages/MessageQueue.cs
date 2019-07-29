@@ -73,13 +73,14 @@ namespace KubeMQ.MSMQSDK.Messages
                     responder.SubscribeToRequests(GetSubscribeRequest(),HandleIncomingRequest);
                     receiveCompleted -= value;
                     receiveCompleted += value;
+                    ResultModel resultModel = _KubeMSMQInitiator.EventRegister(meta, QueueChannelName);
                 }
                 catch (Exception ex)
                 {
 
                     throw ex.GetBaseException();
                 }
-                ResultModel resultModel = _KubeMSMQInitiator.EventRegister(meta, QueueChannelName);
+               
             }
             remove
             {
