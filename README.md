@@ -1,13 +1,13 @@
 # kubemq_msmq_demo
 
-Kubemq.msmsq.sdk example use case, the upgrade to netcore when legacy code still depends on MSMQ.
+Kubemq.msmsq.sdk example use case, the upgrade to .Net Core when legacy code still depends on MSMQ.
 
 ## Getting Started
 
-This demo includes 3 main components
-* msmq_generator(dotnet) - representing the legacy code that is unchanged - MSMQ message generator running on windows server.
-* kubemq_msmq_worker(dotnet) - KubeMQ connector, performs as a bridge between KubeMQ and msmq, running on windows server.
-* kubemq_msmq_receiver - represents an upgraded netcore process communicating with the msmq_generator(dotnet) using KubeMQ
+This demo includes three main components
+* msmq_generator(.Net) - representing the unchanged legacy code - MSMQ message generator running on windows server.
+* kubemq_msmq_worker(.Net) - KubeMQ connector, performs as a bridge between KubeMQ and .Net, running on windows server.
+* kubemq_msmq_receiver - represents an upgraded .Net Core process communicating with the msmq_generator(.Net) using KubeMQ
 
 ### Prerequisites
 
