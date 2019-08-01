@@ -49,5 +49,6 @@ msmq_receiver has some environment variable to communicate with kubme_msmq_worke
       KubeMQServerAddress:  104.47.142.90:50000
 ```
 
+login to kubemq_msmq_client  
 
 
