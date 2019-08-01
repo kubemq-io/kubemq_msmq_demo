@@ -30,7 +30,7 @@ configure kubme_msmq_worker appsettings.json and run
   }
 ```
 Docker:
-Deploy KubeMQ from kubemq.io (https://account.kubemq.io/home/get-kubemq/kubernetes) :)
+Deploy KubeMQ from kubemq.io (https://account.kubemq.io/home/get-kubemq/kubernetes)
 Deploy client container kubemq/kubemq_msmq_client
 ```
 docker pull kubemq/kubemq_msmq_client
