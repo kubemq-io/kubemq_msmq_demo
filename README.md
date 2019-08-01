@@ -1,24 +1,24 @@
 # kubemq_msmq_demo
 
-Kubemq.msmsq.sdk example use case, the upgrade to netcore when depended on msmq.
+Kubemq.msmsq.sdk example use case, the upgrade to netcore when legacy code still depends on MSMQ.
 
 ## Getting Started
 
-This demo includes 4 main components
-* msmq_generator(dotnet) - representing msmq message generator running on windows server
-* kubemq_msmq_worker(dotnet) - represents a general brige between KubeMQ and msmq, running on windows server
-* kubemq_msmq_receiver - represents an upgraded netcore process communicating with the msmq_generator(dotnet) using kubemq and msmq
+This demo includes 3 main components
+* msmq_generator(dotnet) - representing the legacy code that is unchanged - MSMQ message generator running on windows server.
+* kubemq_msmq_worker(dotnet) - KubeMQ connector, performs as a bridge between KubeMQ and msmq, running on windows server.
+* kubemq_msmq_receiver - represents an upgraded netcore process communicating with the msmq_generator(dotnet) using KubeMQ
 
 ### Prerequisites
 
 * Kubernetes environment or docker orchestration 
-* Windows server .net  with msmq queues ".\private$\raqueue", ".\private$\receiver"
+* Windows server .net  with MSMQ queues ".\private$\raqueue", ".\private$\receiver"
 * KubeMQ running with port forward access to GRPC_PORT and REST_PORT
 
 ### Installing
 
 Windows server:
-Configure msmq queues ".\private$\raqueue", ".\private$\receiver"
+Configure MSMQ queues ".\private$\raqueue", ".\private$\receiver"
 run kubemq_msmq_rates_generator 
 configure kubme_msmq_worker appsettings.json and run
 ```
