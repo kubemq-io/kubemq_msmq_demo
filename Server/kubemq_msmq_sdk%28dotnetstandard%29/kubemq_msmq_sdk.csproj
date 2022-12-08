@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
+    <Authors>KubeMQ</Authors>
+    <Company>KubeMQ</Company>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <AssemblyName>KubeMQ.MSMQ.SDK.csharp</AssemblyName>
+    <RootNamespace>KubeMQ.MSMQ.SDK.csharp</RootNamespace>
+    <Description>.NET Client for KubeMQ.MSMQ</Description>
+    <AssemblyVersion>1.0.2.0</AssemblyVersion>
+    <FileVersion>1.0.2.0</FileVersion>
+    <Version>1.0.2-alpha</Version>
+    <PackageId>KubeMQ.MSMQ.SDK</PackageId>
+    <Product>KubeMQ.MSMQ.SDK</Product>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile></DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="KubeMQ.SDK.csharp" Version="1.0.4" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="2.1.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+  </ItemGroup>
+
+</Project>
